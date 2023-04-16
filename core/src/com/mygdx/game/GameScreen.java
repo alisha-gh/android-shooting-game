@@ -16,8 +16,6 @@ public class GameScreen implements Screen {
     private Texture background;
     private MyGdxGame game;
 
-    private float screenRatio;
-
     // constructor to keep a reference to the main Game class
     public GameScreen(MyGdxGame game) {
         this.game = game;
@@ -37,11 +35,7 @@ public class GameScreen implements Screen {
     @Override
     public void render(float delta) {
         batch.begin();
-        // Calculate the dimensions of the background image while maintaining aspect ratio
-        float backgroundWidth = Gdx.graphics.getWidth();
-        float backgroundHeight = backgroundWidth / background.getWidth() * background.getHeight();
-        // Draw the background image with the calculated dimensions
-        batch.draw(background, 0, 0, backgroundWidth, backgroundHeight);
+        batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         batch.end();
     }
 
@@ -61,7 +55,9 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
         batch.dispose();
-        background.dispose();
+        if (background != null) {
+            background.dispose();
+        }
     }
 
     // Helper method to set up the camera, batch, particle effect, and background image
@@ -69,10 +65,10 @@ public class GameScreen implements Screen {
         Gdx.app.log("GameScreen: ", "gameScreen create");
         float w = Gdx.graphics.getWidth();
         float h = Gdx.graphics.getHeight();
-        screenRatio = w / h; // Calculate the screen ratio
-        camera = new OrthographicCamera(w, h);
+        float screenRatio = w / h; // Calculate the screen ratio
+        camera = new OrthographicCamera();
         batch = new SpriteBatch();
-        batch.setProjectionMatrix(camera.combined);
         background = new Texture(Gdx.files.internal("Backgrounds/07/Repeated.png"));
+        camera.setToOrtho(false, background.getHeight() * screenRatio, background.getHeight());
     }
 }
