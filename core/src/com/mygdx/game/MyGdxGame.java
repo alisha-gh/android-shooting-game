@@ -1,21 +1,16 @@
 package com.mygdx.game;
-
-import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Game;
-import com.badlogic.gdx.Gdx;
 
 public class MyGdxGame extends Game implements ApplicationListener  {
 	public static GameScreen gameScreen;
-
+	public static MenuScreen menuScreen;
 
 	@Override
 	public void create () {
 		gameScreen = new GameScreen(this);
-		setScreen(gameScreen);
+		menuScreen = new MenuScreen(this);
+		setScreen(menuScreen);
 	}
 	@Override
 	public void dispose() {
