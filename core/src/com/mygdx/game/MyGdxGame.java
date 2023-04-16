@@ -1,6 +1,8 @@
 package com.mygdx.game;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
 
 public class MyGdxGame extends Game implements ApplicationListener  {
 	public static GameScreen gameScreen;

@@ -1,36 +1,54 @@
 package com.mygdx.game;
+
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Rectangle;
 
 public class Button {
-    private Texture texture;
-    private Rectangle bounds;
-    private boolean pressed;
 
-    public Button(Texture texture, float x, float y, float width, float height) {
-        this.texture = texture;
-        this.bounds = new Rectangle(x, y, width, height);
-        this.pressed = false;
+    float x;
+    float y;
+    float w;
+    float h;
+    boolean isDown = false;
+    boolean isDownPrev = false;
+
+    Texture textureUp;
+    Texture textureDown;
+
+    public Button(float x, float y, float w, float h, Texture textureUp, Texture textureDown) {
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
+
+        this.textureUp = textureUp;
+        this.textureDown = textureDown;
     }
 
-    public void render(SpriteBatch batch) {
-        batch.draw(texture, bounds.x, bounds.y, bounds.width, bounds.height);
-    }
+    public void update(boolean checkTouch, int touchX, int touchY) {
+        isDown = false;
 
-    public boolean isPressed(float x, float y) {
-        if (bounds.contains(x, y)) {
-            pressed = true;
-            return true;
+        if (checkTouch) {
+            int h2 = Gdx.graphics.getHeight();
+            //Touch coordinates have origin in top-left instead of bottom left
+
+            isDownPrev = isDown;
+            if (touchX >= x && touchX <= x + w && h2 - touchY >= y && h2 - touchY <= y + h) {
+                isDown = true;
+            }
         }
-        return false;
     }
 
-    public void reset() {
-        pressed = false;
+    public void draw(SpriteBatch batch) {
+        if (! isDown) {
+            batch.draw(textureUp, x, y, w, h);
+        } else {
+            batch.draw(textureDown, x, y, w, h);
+        }
     }
 
-    public boolean isPressed() {
-        return pressed;
+    public boolean justPressed() {
+        return isDown && !isDownPrev;
     }
 }
