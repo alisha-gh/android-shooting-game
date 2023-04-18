@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 public class GameScreen implements Screen {
+    Vector2 playerPosition;
     private OrthographicCamera camera;
     private Texture background;
     private MyGdxGame game;
@@ -45,8 +46,9 @@ public class GameScreen implements Screen {
     Button moveDownButton;
     Button moveUpButton;
     Button restartButton;
-
     boolean restartActive;
+
+    float backgroundX = 0;
 
     // constructor to keep a reference to the main Game class
     public GameScreen(MyGdxGame game) {
@@ -75,12 +77,20 @@ public class GameScreen implements Screen {
         spriteBatch.setProjectionMatrix(camera.combined);
         spriteBatch.begin();
         //playerSprite.setPosition(100,100);
-        playerSprite.setX(100); // Set player sprite's x-coordinate to 0 (left side of the screen)
-        playerSprite.setY(Gdx.graphics.getHeight() / 2 - playerSprite.getHeight() / 2); // Set player sprite's y-coordinate to the middle of the screen
+        //TODO use vector2
+        playerSprite.setX(playerPosition.x);
+        playerSprite.setY(playerPosition.y);
+        //playerSprite.setX(100); // Set player sprite's x-coordinate to 0 (left side of the screen)
+        //playerSprite.setY(Gdx.graphics.getHeight() / 2 - playerSprite.getHeight() / 2); // Set player sprite's y-coordinate to the middle of the screen
+        spriteBatch.draw(background, backgroundX, 0);
+        spriteBatch.draw(background, backgroundX+background.getWidth(), 0);
         playerSprite.draw(spriteBatch);
-        spriteBatch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         spriteBatch.end();
 
+        backgroundX -= 1000 * dt;
+        if(backgroundX < -background.getWidth()){
+            backgroundX += background.getWidth();
+        }
         //Draw UI
         uiBatch.begin();
         switch(gameState) {
@@ -149,9 +159,12 @@ public class GameScreen implements Screen {
 
         //Player
         playerSprite = new Sprite(playerTexture);
-        playerSprite.setSize(48, 48);
+        playerSprite.setSize(480, 480);
         playerDelta = new Vector2();
         playerDeltaRectangle = new Rectangle(0, 0, playerSprite.getWidth(), playerSprite.getHeight());
+        playerPosition = new Vector2(100, Gdx.graphics.getHeight() / 2 - playerSprite.getHeight() / 2);
+        //.setX(100); // Set player sprite's x-coordinate to 0 (left side of the screen)
+        //playerSprite.setY(Gdx.graphics.getHeight() / 2 - playerSprite.getHeight() / 2);
 
         //Buttons
         float buttonSize = h * 0.1f;
