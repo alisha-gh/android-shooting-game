@@ -232,6 +232,7 @@ public class GameScreen implements Screen {
                 moveDownButton.update(checkTouch, touchX, touchY);
                 moveUpButton.update(checkTouch, touchX, touchY);
                 attackButton.update(checkTouch, touchX, touchY);
+                pauseButton.update(checkTouch, touchX, touchY);
 
                 int moveX = 0;
                 int moveY = 0;
@@ -254,6 +255,11 @@ public class GameScreen implements Screen {
                 if (Gdx.input.isKeyPressed(Input.Keys.SPACE) || attackButton.isDown) {
                     attackButton.isDown = true;
                     Gdx.app.log("Attack Button is Pressed", String.valueOf(attackButton.isDown));
+                }
+                if (Gdx.input.isKeyPressed(Input.Keys.ENTER) || pauseButton.isDown) {
+                    pauseButton.isDown = true;
+                    gameState = GameState.PAUSE;
+                    Gdx.app.log("Pause Button is Pressed", String.valueOf(pauseButton.isDown));
                 }
 
                 //Determine Character Movement Distance
