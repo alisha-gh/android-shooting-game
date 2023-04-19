@@ -4,15 +4,12 @@ import static java.lang.String.valueOf;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.maps.MapLayer;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
@@ -72,6 +69,8 @@ public class GameScreen implements Screen {
     boolean restartActive;
 
     float backgroundX = 0;
+
+    private Music backgroundMusic;
 
     // constructor to keep a reference to the main Game class
     public GameScreen(MyGdxGame game) {
@@ -225,8 +224,8 @@ public class GameScreen implements Screen {
 
                     //TODO Move player and camera
                     playerSprite.translate(playerSprite.getX()+1000, 100);
-                    //playerSprite.translateX(500);
-                    camera.translate(playerDelta);
+                    //playerPosition.x = 500;
+                    //camera.translate(playerDelta);
                 }
 
                 //TODO Check if player has met the winning condition
@@ -340,6 +339,11 @@ public class GameScreen implements Screen {
         moveUpButton = new Button(buttonSize, buttonSize*2, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
         //attackButton = new Button(screenWidth/2 - buttonSize*2, screenHeight * 0.2f, buttonSize*4, buttonSize, buttonAttackTexture, buttonAttackTexture);
         restartButton = new Button(screenWidth/2 - buttonSize*2, screenHeight * 0.2f, buttonSize*4, buttonSize, buttonLongTexture, buttonLongDownTexture);
+
+        //Background Music
+        backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("Music/neon-gaming-128925.mp3"));
+        backgroundMusic.setLooping(true);
+        backgroundMusic.play();
 
         newGame();
     }
