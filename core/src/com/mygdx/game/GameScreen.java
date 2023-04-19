@@ -225,8 +225,8 @@ public class GameScreen implements Screen {
 
                     //TODO Move player and camera
                     playerSprite.translate(playerSprite.getX()+1000, 100);
-                    playerSprite.translateX(500);
-//                  camera.translate(playerDelta);
+                    //playerSprite.translateX(500);
+                    camera.translate(playerDelta);
                 }
 
                 //TODO Check if player has met the winning condition
@@ -283,6 +283,7 @@ public class GameScreen implements Screen {
         buttonLongTexture.dispose();
         buttonLongDownTexture.dispose();
         enemyTexture.dispose();
+        missileTexture.dispose();
     }
 
     // Helper method to set up the camera, batch, particle effect, and background image
@@ -308,6 +309,7 @@ public class GameScreen implements Screen {
         buttonLongTexture = new Texture("buttons/buttonLong_blue.png");
         buttonLongDownTexture = new Texture("buttons/buttonLong_beige_pressed.png");
         missileTexture = new Texture("Missile.png");
+        //buttonAttackTexture = new Texture("buttons/buttonLong_blue.png");
 
         //Player
         playerSprite = new Sprite(playerTexture);
@@ -336,6 +338,7 @@ public class GameScreen implements Screen {
         moveRightButton = new Button(buttonSize*2, buttonSize, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
         moveDownButton = new Button(buttonSize, 0.0f, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
         moveUpButton = new Button(buttonSize, buttonSize*2, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
+        //attackButton = new Button(screenWidth/2 - buttonSize*2, screenHeight * 0.2f, buttonSize*4, buttonSize, buttonAttackTexture, buttonAttackTexture);
         restartButton = new Button(screenWidth/2 - buttonSize*2, screenHeight * 0.2f, buttonSize*4, buttonSize, buttonLongTexture, buttonLongDownTexture);
 
         newGame();
