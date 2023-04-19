@@ -44,6 +44,13 @@ public class GameScreen implements Screen {
     Rectangle enemyDeltaRectangle;
     Vector2 enemyPosition;
 
+    //Missile
+    Texture missileTexture;
+    Sprite missileSprite;
+    Vector2 missileDelta;
+    Rectangle missileDeltaRectangle;
+    Vector2 missilePosition;
+
     //Map and rendering
     SpriteBatch spriteBatch;
     SpriteBatch uiBatch; //Second SpriteBatch without camera transforms, for drawing UI
@@ -53,6 +60,7 @@ public class GameScreen implements Screen {
     Texture buttonSquareDownTexture;
     Texture buttonLongTexture;
     Texture buttonLongDownTexture;
+    Texture buttonAttackTexture;
 
     //UI Buttons
     Button moveLeftButton;
@@ -60,6 +68,7 @@ public class GameScreen implements Screen {
     Button moveDownButton;
     Button moveUpButton;
     Button restartButton;
+    Button attackButton;
     boolean restartActive;
 
     float backgroundX = 0;
@@ -93,16 +102,23 @@ public class GameScreen implements Screen {
         spriteBatch.setProjectionMatrix(camera.combined);
         spriteBatch.begin();
         //playerSprite.setPosition(100,100);
-        playerSprite.setX(playerPosition.x);
-        playerSprite.setY(playerPosition.y);
+
         //playerSprite.setX(100); // Set player sprite's x-coordinate to 0 (left side of the screen)
         //playerSprite.setY(Gdx.graphics.getHeight() / 2 - playerSprite.getHeight() / 2); // Set player sprite's y-coordinate to the middle of the screen
+        spriteBatch.draw(background, backgroundX, 0);  //first background
+        spriteBatch.draw(background, backgroundX+background.getWidth(), 0); //second background
+
+        playerSprite.setX(playerPosition.x);
+        playerSprite.setY(playerPosition.y);
+        playerSprite.draw(spriteBatch);
+
         enemySprite.setX(enemyPosition.x);
         enemySprite.setY(enemyPosition.y);
-        spriteBatch.draw(background, backgroundX, 0);
-        spriteBatch.draw(background, backgroundX+background.getWidth(), 0);
-        playerSprite.draw(spriteBatch);
         enemySprite.draw(spriteBatch);
+
+        missileSprite.setX(playerPosition.x + playerSprite.getWidth());
+        missileSprite.setY(playerPosition.y);
+        missileSprite.draw(spriteBatch);
         spriteBatch.end();
 
         backgroundX -= 1000 * dt;
@@ -209,6 +225,7 @@ public class GameScreen implements Screen {
 
                     //TODO Move player and camera
                     playerSprite.translate(playerSprite.getX()+1000, 100);
+                    playerSprite.translateX(500);
 //                  camera.translate(playerDelta);
                 }
 
@@ -265,6 +282,7 @@ public class GameScreen implements Screen {
         buttonSquareDownTexture.dispose();
         buttonLongTexture.dispose();
         buttonLongDownTexture.dispose();
+        enemyTexture.dispose();
     }
 
     // Helper method to set up the camera, batch, particle effect, and background image
@@ -274,12 +292,13 @@ public class GameScreen implements Screen {
         uiBatch = new SpriteBatch();
 
         //Camera
-        float w = Gdx.graphics.getWidth();
-        float h = Gdx.graphics.getHeight();
-        float screenRatio = w / h; // Calculate the screen ratio
+        float screenWidth = Gdx.graphics.getWidth();
+        float screenHeight = Gdx.graphics.getHeight();
+        float screenRatio = screenWidth / screenHeight; // Calculate the screen ratio
         camera = new OrthographicCamera();
         background = new Texture(Gdx.files.internal("Backgrounds/07/Repeated.png"));
-        camera.setToOrtho(false, background.getHeight() * screenRatio, background.getHeight());
+        float viewportWidth = background.getHeight() * screenRatio;
+        camera.setToOrtho(false, viewportWidth, background.getHeight());
 
         //Textures
         playerTexture = new Texture("Plane02/Moving/skeleton-MovingNIdle_0.png");
@@ -288,28 +307,36 @@ public class GameScreen implements Screen {
         buttonSquareDownTexture = new Texture("buttons/buttonSquare_beige_pressed.png");
         buttonLongTexture = new Texture("buttons/buttonLong_blue.png");
         buttonLongDownTexture = new Texture("buttons/buttonLong_beige_pressed.png");
+        missileTexture = new Texture("Missile.png");
 
         //Player
         playerSprite = new Sprite(playerTexture);
         playerSprite.setSize(480, 480);
         playerDelta = new Vector2();
         playerDeltaRectangle = new Rectangle(0, 0, playerSprite.getWidth(), playerSprite.getHeight());
-        playerPosition = new Vector2(100, Gdx.graphics.getHeight() / 2 - playerSprite.getHeight() / 2);
+        playerPosition = new Vector2(100, screenHeight / 2 - playerSprite.getHeight() / 2);
 
         //Enemy
         enemySprite = new Sprite(enemyTexture);
         enemySprite.setSize(400, 400);
         enemyDelta = new Vector2();
         enemyDeltaRectangle = new Rectangle(0, 0, playerSprite.getWidth(), playerSprite.getHeight());
-        enemyPosition = new Vector2(w - enemySprite.getWidth() * 2, h / 2 - playerSprite.getHeight() / 2);
+        enemyPosition = new Vector2(viewportWidth - enemySprite.getWidth() * 2, screenHeight / 2 - playerSprite.getHeight() / 2);
+
+        //Missile
+        missileSprite = new Sprite(missileTexture);
+        missileSprite.setSize(80, 80);
+        missileDelta = new Vector2();
+        missileDeltaRectangle = new Rectangle(0, 0, missileSprite.getWidth(), missileSprite.getHeight());
+        missilePosition = new Vector2(playerPosition.x + playerSprite.getWidth(), 1000);
 
         //Buttons
-        float buttonSize = h * 0.1f;
+        float buttonSize = screenHeight * 0.1f;
         moveLeftButton = new Button(0.0f, buttonSize, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
         moveRightButton = new Button(buttonSize*2, buttonSize, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
         moveDownButton = new Button(buttonSize, 0.0f, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
         moveUpButton = new Button(buttonSize, buttonSize*2, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
-        restartButton = new Button(w/2 - buttonSize*2, h * 0.2f, buttonSize*4, buttonSize, buttonLongTexture, buttonLongDownTexture);
+        restartButton = new Button(screenWidth/2 - buttonSize*2, screenHeight * 0.2f, buttonSize*4, buttonSize, buttonLongTexture, buttonLongDownTexture);
 
         newGame();
     }
@@ -317,9 +344,6 @@ public class GameScreen implements Screen {
     private void newGame(){
         gameState = GameState.PLAYING;
 
-        //Translate camera to center of screen
-        //camera.position.x = 16;
-        //camera.position.y = 16;
         dt = 0.0f;
 
         //Player start location
