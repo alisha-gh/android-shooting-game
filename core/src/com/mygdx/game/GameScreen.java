@@ -21,7 +21,6 @@ public class GameScreen implements Screen {
     GameState gameState = GameState.PLAYING;
 
     public static final float MOVEMENT_SPEED = 200.0f;
-    public static final float GOAL_BOB_HEIGHT = 5.0f;
 
     //Game clock
     float dt;
@@ -48,7 +47,6 @@ public class GameScreen implements Screen {
     Rectangle missileDeltaRectangle;
     Vector2 missilePosition;
 
-    //Map and rendering
     SpriteBatch spriteBatch;
     SpriteBatch uiBatch; //Second SpriteBatch without camera transforms, for drawing UI
 
@@ -82,9 +80,67 @@ public class GameScreen implements Screen {
         create();
     }
 
-    @Override
-    public void hide() {
-        Gdx.app.log("GameScreen: ", "gameScreen hide called");
+    private void create() {
+        Gdx.app.log("GameScreen: ", "gameScreen create");
+        spriteBatch = new SpriteBatch();
+        uiBatch = new SpriteBatch();
+
+        //Camera
+        float screenWidth = Gdx.graphics.getWidth();
+        float screenHeight = Gdx.graphics.getHeight();
+        float screenRatio = screenWidth / screenHeight; // Calculate the screen ratio
+        camera = new OrthographicCamera();
+        background = new Texture(Gdx.files.internal("Backgrounds/07/Repeated.png"));
+        float viewportWidth = background.getHeight() * screenRatio;
+        camera.setToOrtho(false, viewportWidth, background.getHeight());
+
+        //Textures
+        playerTexture = new Texture("Plane02/Moving/skeleton-MovingNIdle_0.png");
+        enemyTexture = new Texture("Enemy/Moving/skeleton-Moving_0.png");
+        buttonSquareTexture = new Texture("buttons/buttonSquare_blue.png");
+        buttonSquareDownTexture = new Texture("buttons/buttonSquare_beige_pressed.png");
+        buttonLongTexture = new Texture("buttons/buttonLong_blue.png");
+        buttonLongDownTexture = new Texture("buttons/buttonLong_beige_pressed.png");
+        missileTexture = new Texture("Missile.png");
+        buttonAttackTexture = new Texture("buttons/Shoot_btn.png");
+        buttonAttackDownTexture = new Texture("buttons/Bubble.png");
+
+        //Player
+        playerSprite = new Sprite(playerTexture);
+        playerSprite.setSize(480, 480);
+        playerDelta = new Vector2();
+        playerDeltaRectangle = new Rectangle(0, 0, playerSprite.getWidth(), playerSprite.getHeight());
+        playerPosition = new Vector2(100, screenHeight / 2 - playerSprite.getHeight() / 2);
+
+        //Enemy
+        enemySprite = new Sprite(enemyTexture);
+        enemySprite.setSize(400, 400);
+        enemyDelta = new Vector2();
+        enemyDeltaRectangle = new Rectangle(0, 0, playerSprite.getWidth(), playerSprite.getHeight());
+        enemyPosition = new Vector2(viewportWidth - enemySprite.getWidth() * 2, screenHeight / 2 - playerSprite.getHeight() / 2);
+
+        //Missile
+        missileSprite = new Sprite(missileTexture);
+        missileSprite.setSize(80, 80);
+        missileDelta = new Vector2();
+        missileDeltaRectangle = new Rectangle(0, 0, missileSprite.getWidth(), missileSprite.getHeight());
+        missilePosition = new Vector2(playerPosition.x + playerSprite.getWidth(), 1000);
+
+        //Buttons
+        float buttonSize = screenHeight * 0.1f;
+        moveLeftButton = new Button(0.0f, buttonSize, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
+        moveRightButton = new Button(buttonSize*2, buttonSize, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
+        moveDownButton = new Button(buttonSize, 0.0f, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
+        moveUpButton = new Button(buttonSize, buttonSize*2, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
+        attackButton = new Button(screenWidth - 500, 200, buttonSize*2, buttonSize*2, buttonAttackTexture, buttonAttackDownTexture);
+        restartButton = new Button(screenWidth/2 - buttonSize*2, screenHeight * 0.2f, buttonSize*4, buttonSize, buttonLongTexture, buttonLongDownTexture);
+
+        //Background Music
+        backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("Music/neon-gaming-128925.mp3"));
+        backgroundMusic.setLooping(true);
+        backgroundMusic.play();
+
+        newGame();
     }
 
     @Override
@@ -121,7 +177,7 @@ public class GameScreen implements Screen {
         missileSprite.draw(spriteBatch);
         spriteBatch.end();
 
-        backgroundX -= 1000 * dt;
+        backgroundX -= 800 * dt; //background movement speed
         //Reposition the background when it goes out of scope
         if(backgroundX < -background.getWidth()){
             backgroundX += background.getWidth();
@@ -161,6 +217,7 @@ public class GameScreen implements Screen {
                 moveRightButton.update(checkTouch, touchX, touchY);
                 moveDownButton.update(checkTouch, touchX, touchY);
                 moveUpButton.update(checkTouch, touchX, touchY);
+                attackButton.update(checkTouch, touchX, touchY);
 
                 int moveX = 0;
                 int moveY = 0;
@@ -179,6 +236,10 @@ public class GameScreen implements Screen {
                 if (Gdx.input.isKeyPressed(Input.Keys.DPAD_UP) || moveUpButton.isDown) {
                     moveUpButton.isDown = true;
                     moveY += 1;
+                }
+                if (Gdx.input.isKeyPressed(Input.Keys.SPACE) || attackButton.isDown) {
+                    attackButton.isDown = true;
+                    Gdx.app.log("Attack Button is Pressed", String.valueOf(attackButton.isDown));
                 }
 
                 //TODO Determine Character Movement Distance
@@ -261,18 +322,6 @@ public class GameScreen implements Screen {
     }
 
     @Override
-    public void resize(int width, int height) {
-    }
-
-    @Override
-    public void pause() {
-    }
-
-    @Override
-    public void resume() {
-    }
-
-    @Override
     public void dispose() {
         spriteBatch.dispose();
         if (background != null) {
@@ -287,70 +336,6 @@ public class GameScreen implements Screen {
         missileTexture.dispose();
     }
 
-    // Helper method to set up the camera, batch, particle effect, and background image
-    private void create() {
-        Gdx.app.log("GameScreen: ", "gameScreen create");
-        spriteBatch = new SpriteBatch();
-        uiBatch = new SpriteBatch();
-
-        //Camera
-        float screenWidth = Gdx.graphics.getWidth();
-        float screenHeight = Gdx.graphics.getHeight();
-        float screenRatio = screenWidth / screenHeight; // Calculate the screen ratio
-        camera = new OrthographicCamera();
-        background = new Texture(Gdx.files.internal("Backgrounds/07/Repeated.png"));
-        float viewportWidth = background.getHeight() * screenRatio;
-        camera.setToOrtho(false, viewportWidth, background.getHeight());
-
-        //Textures
-        playerTexture = new Texture("Plane02/Moving/skeleton-MovingNIdle_0.png");
-        enemyTexture = new Texture("Enemy/Moving/skeleton-Moving_0.png");
-        buttonSquareTexture = new Texture("buttons/buttonSquare_blue.png");
-        buttonSquareDownTexture = new Texture("buttons/buttonSquare_beige_pressed.png");
-        buttonLongTexture = new Texture("buttons/buttonLong_blue.png");
-        buttonLongDownTexture = new Texture("buttons/buttonLong_beige_pressed.png");
-        missileTexture = new Texture("Missile.png");
-        buttonAttackTexture = new Texture("buttons/buttonSquare_blue.png");
-        buttonAttackDownTexture = new Texture("buttons/buttonSquare_beige_pressed.png");
-
-        //Player
-        playerSprite = new Sprite(playerTexture);
-        playerSprite.setSize(480, 480);
-        playerDelta = new Vector2();
-        playerDeltaRectangle = new Rectangle(0, 0, playerSprite.getWidth(), playerSprite.getHeight());
-        playerPosition = new Vector2(100, screenHeight / 2 - playerSprite.getHeight() / 2);
-
-        //Enemy
-        enemySprite = new Sprite(enemyTexture);
-        enemySprite.setSize(400, 400);
-        enemyDelta = new Vector2();
-        enemyDeltaRectangle = new Rectangle(0, 0, playerSprite.getWidth(), playerSprite.getHeight());
-        enemyPosition = new Vector2(viewportWidth - enemySprite.getWidth() * 2, screenHeight / 2 - playerSprite.getHeight() / 2);
-
-        //Missile
-        missileSprite = new Sprite(missileTexture);
-        missileSprite.setSize(80, 80);
-        missileDelta = new Vector2();
-        missileDeltaRectangle = new Rectangle(0, 0, missileSprite.getWidth(), missileSprite.getHeight());
-        missilePosition = new Vector2(playerPosition.x + playerSprite.getWidth(), 1000);
-
-        //Buttons
-        float buttonSize = screenHeight * 0.1f;
-        moveLeftButton = new Button(0.0f, buttonSize, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
-        moveRightButton = new Button(buttonSize*2, buttonSize, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
-        moveDownButton = new Button(buttonSize, 0.0f, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
-        moveUpButton = new Button(buttonSize, buttonSize*2, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
-        attackButton = new Button(screenWidth - 500, 200, buttonSize*2, buttonSize*2, buttonAttackTexture, buttonAttackDownTexture);
-        restartButton = new Button(screenWidth/2 - buttonSize*2, screenHeight * 0.2f, buttonSize*4, buttonSize, buttonLongTexture, buttonLongDownTexture);
-
-        //Background Music
-        backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("Music/neon-gaming-128925.mp3"));
-        backgroundMusic.setLooping(true);
-        backgroundMusic.play();
-
-        newGame();
-    }
-
     private void newGame(){
         gameState = GameState.PLAYING;
 
@@ -361,5 +346,22 @@ public class GameScreen implements Screen {
         camera.translate(playerSprite.getX(), playerSprite.getY());
 
         restartActive = false;
+    }
+
+    @Override
+    public void resize(int width, int height) {
+    }
+
+    @Override
+    public void pause() {
+    }
+
+    @Override
+    public void resume() {
+    }
+
+    @Override
+    public void hide() {
+        Gdx.app.log("GameScreen: ", "gameScreen hide called");
     }
 }
