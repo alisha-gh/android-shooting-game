@@ -1,5 +1,8 @@
 package com.mygdx.game;
+import static java.lang.String.valueOf;
+
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -7,11 +10,13 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.maps.MapLayer;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 public class GameScreen implements Screen {
-    Vector2 playerPosition;
     private OrthographicCamera camera;
     private Texture background;
     private MyGdxGame game;
@@ -29,6 +34,14 @@ public class GameScreen implements Screen {
     Sprite playerSprite;
     Vector2 playerDelta;
     Rectangle playerDeltaRectangle;
+    Vector2 playerPosition;
+
+
+    //Enemy Character
+    Texture enemyTexture;
+    Sprite enemySprite;
+    Vector2 enemyDelta;
+    Rectangle enemyDeltaRectangle;
 
     //Map and rendering
     SpriteBatch spriteBatch;
@@ -67,6 +80,8 @@ public class GameScreen implements Screen {
     @Override
     public void render(float delta) {
         dt = Gdx.graphics.getDeltaTime();
+        //Update the Game State
+        update();
 
         //Clear the screen every frame before drawing.
         Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -77,7 +92,6 @@ public class GameScreen implements Screen {
         spriteBatch.setProjectionMatrix(camera.combined);
         spriteBatch.begin();
         //playerSprite.setPosition(100,100);
-        //TODO use vector2
         playerSprite.setX(playerPosition.x);
         playerSprite.setY(playerPosition.y);
         //playerSprite.setX(100); // Set player sprite's x-coordinate to 0 (left side of the screen)
@@ -110,6 +124,119 @@ public class GameScreen implements Screen {
         uiBatch.end();
     }
 
+    /**Method for all game logic. This method is called at the start of GameCore.render() below. */
+    private void update() {
+        //Touch Input Info
+        boolean checkTouch = Gdx.input.isTouched();
+        int touchX = Gdx.input.getX();
+        int touchY = Gdx.input.getY();
+
+        //Update Game State based on input
+        switch (gameState) {
+
+            case PLAYING:
+                //Poll user for input
+                moveLeftButton.update(checkTouch, touchX, touchY);
+                moveRightButton.update(checkTouch, touchX, touchY);
+                moveDownButton.update(checkTouch, touchX, touchY);
+                moveUpButton.update(checkTouch, touchX, touchY);
+
+                int moveX = 0;
+                int moveY = 0;
+                if (Gdx.input.isKeyPressed(Input.Keys.DPAD_LEFT) || moveLeftButton.isDown) {
+                    moveLeftButton.isDown = true;
+                    moveX -= 1;
+                }
+                if (Gdx.input.isKeyPressed(Input.Keys.DPAD_RIGHT) || moveRightButton.isDown) {
+                    moveRightButton.isDown = true;
+                    moveX += 1;
+                }
+                if (Gdx.input.isKeyPressed(Input.Keys.DPAD_DOWN) || moveDownButton.isDown) {
+                    moveDownButton.isDown = true;
+                    moveY -= 1;
+                }
+                if (Gdx.input.isKeyPressed(Input.Keys.DPAD_UP) || moveUpButton.isDown) {
+                    moveUpButton.isDown = true;
+                    moveY += 1;
+                }
+
+                //TODO Determine Character Movement Distance
+                playerDelta.x = moveX * MOVEMENT_SPEED * dt;
+                playerDelta.y = moveY * MOVEMENT_SPEED * dt;
+
+                //TODO Check movement against grid
+                if (playerDelta.len2() > 0) { //Don't do anything if we're not moving
+
+                    //TODO Determine bounds to check within
+                    // Find top-right corner tile
+                    int right = (int) Math.ceil(Math.max(playerSprite.getX() + playerSprite.getWidth(),playerSprite.getX() + playerSprite.getWidth() + playerDelta.x));
+                    int top = (int) Math.ceil(Math.max(playerSprite.getY() + playerSprite.getHeight(),playerSprite.getY() + playerSprite.getHeight() + playerDelta.y));
+
+                    // Find bottom-left corner tile
+                    int left = (int) Math.floor(Math.min(playerSprite.getX(),playerSprite.getX() + playerDelta.x));
+                    int bottom = (int) Math.floor(Math.min(playerSprite.getY(),playerSprite.getY() + playerDelta.y));
+
+                    // Divide bounds by tile sizes to retrieve tile indices
+                    //right /= tileLayer.getTileWidth();
+                    //top /= tileLayer.getTileHeight();
+                    //left /= tileLayer.getTileWidth();
+                    //bottom /= tileLayer.getTileHeight();
+
+                    //TODO Loop through selected tiles and correct by each axis
+                    //EXTRA: Try counting down if moving left or down instead of counting up
+                    for (int y = bottom; y <= top; y++) {
+                        for (int x = left; x <= right; x++) {
+                            //TiledMapTileLayer.Cell targetCell = tileLayer.getCell(x, y);
+                            // If the cell is empty, ignore it
+                            //if (targetCell == null) continue;
+                            // Otherwise correct against tested squares
+                            //tileRectangle.x = x * tileLayer.getTileWidth();
+                            //tileRectangle.y = y * tileLayer.getTileHeight();
+
+                            playerDeltaRectangle.x = playerSprite.getX() + playerDelta.x;
+                            playerDeltaRectangle.y = playerSprite.getY();
+                            //if (tileRectangle.overlaps(playerDeltaRectangle)) playerDelta.x = 0;
+
+                            playerDeltaRectangle.x = playerSprite.getX();
+                            playerDeltaRectangle.y = playerSprite.getY() + playerDelta.y;
+                            //if (tileRectangle.overlaps(playerDeltaRectangle)) playerDelta.y = 0;
+                        }
+                    }
+
+                    //TODO Move player and camera
+                    playerSprite.translate(playerSprite.getX()+1000, 100);
+//                  camera.translate(playerDelta);
+                }
+
+                //TODO Check if player has met the winning condition
+//                if (playerSprite.getBoundingRectangle().overlaps(goalSprite.getBoundingRectangle())) {
+//                    //Player has won!
+//                    gameState = GameState.COMPLETE;
+//                }
+
+                //TODO Calculate overhead layer opacity
+//                if (playerSprite.getBoundingRectangle().overlaps(opacityTrigger)) {
+//                    overheadOpacity -= dt * 5.0f;
+//                } else {
+//                    overheadOpacity += dt * 5.0f;
+//                }
+//                overheadOpacity = MathUtils.clamp(overheadOpacity, 0.0f, 1.0f);
+
+                break;
+
+            case COMPLETE:
+                //Poll for input
+                restartButton.update(checkTouch, touchX, touchY);
+
+                if (Gdx.input.isKeyPressed(Input.Keys.DPAD_CENTER) || restartButton.isDown) {
+                    restartButton.isDown = true;
+                    restartActive = true;
+                } else if (restartActive) {
+                    newGame();
+                }
+                break;
+        }
+    }
 
     @Override
     public void resize(int width, int height) {
@@ -163,8 +290,6 @@ public class GameScreen implements Screen {
         playerDelta = new Vector2();
         playerDeltaRectangle = new Rectangle(0, 0, playerSprite.getWidth(), playerSprite.getHeight());
         playerPosition = new Vector2(100, Gdx.graphics.getHeight() / 2 - playerSprite.getHeight() / 2);
-        //.setX(100); // Set player sprite's x-coordinate to 0 (left side of the screen)
-        //playerSprite.setY(Gdx.graphics.getHeight() / 2 - playerSprite.getHeight() / 2);
 
         //Buttons
         float buttonSize = h * 0.1f;
