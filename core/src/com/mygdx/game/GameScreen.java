@@ -20,7 +20,7 @@ public class GameScreen implements Screen {
     public enum GameState { PLAYING, COMPLETE }
     GameState gameState = GameState.PLAYING;
 
-    public static final float MOVEMENT_SPEED = 200.0f;
+    public static final float MOVEMENT_SPEED = 400.0f;
 
     //Game clock
     float dt;
@@ -175,6 +175,7 @@ public class GameScreen implements Screen {
         missileSprite.setX(playerPosition.x + playerSprite.getWidth());
         missileSprite.setY(playerPosition.y);
         missileSprite.draw(spriteBatch);
+
         spriteBatch.end();
 
         backgroundX -= 800 * dt; //background movement speed
@@ -286,9 +287,9 @@ public class GameScreen implements Screen {
                     }
 
                     //TODO Move player and camera
-                    playerSprite.translate(playerSprite.getX()+1000, 100);
-                    //playerPosition.x = 500;
-                    //camera.translate(playerDelta);
+                    playerPosition.x += playerDelta.x;
+                    playerPosition.y += playerDelta.y;
+                    playerSprite.translate(playerDelta.x, playerDelta.y);
                 }
 
                 //TODO Check if player has met the winning condition
