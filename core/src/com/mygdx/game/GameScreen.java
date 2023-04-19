@@ -171,6 +171,7 @@ public class GameScreen implements Screen {
         enemySprite.setX(enemyPosition.x);
         enemySprite.setY(enemyPosition.y);
         enemySprite.draw(spriteBatch);
+        updateEnemy();
 
         missileSprite.setX(playerPosition.x + playerSprite.getWidth());
         missileSprite.setY(playerPosition.y);
@@ -243,7 +244,7 @@ public class GameScreen implements Screen {
                     Gdx.app.log("Attack Button is Pressed", String.valueOf(attackButton.isDown));
                 }
 
-                //TODO Determine Character Movement Distance
+                //Determine Character Movement Distance
                 playerDelta.x = moveX * MOVEMENT_SPEED * dt;
                 playerDelta.y = moveY * MOVEMENT_SPEED * dt;
 
@@ -286,7 +287,7 @@ public class GameScreen implements Screen {
                         }
                     }
 
-                    //TODO Move player and camera
+                    //Move player
                     playerPosition.x += playerDelta.x;
                     playerPosition.y += playerDelta.y;
                     playerSprite.translate(playerDelta.x, playerDelta.y);
@@ -320,6 +321,12 @@ public class GameScreen implements Screen {
                 }
                 break;
         }
+    }
+
+    private void updateEnemy(){
+        enemyDelta.x = MOVEMENT_SPEED * dt;
+        enemyPosition.x -= enemyDelta.x;
+        enemySprite.translate(enemyDelta.x, enemyDelta.y);
     }
 
     @Override
