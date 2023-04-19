@@ -42,6 +42,7 @@ public class GameScreen implements Screen {
     Sprite enemySprite;
     Vector2 enemyDelta;
     Rectangle enemyDeltaRectangle;
+    Vector2 enemyPosition;
 
     //Map and rendering
     SpriteBatch spriteBatch;
@@ -96,9 +97,12 @@ public class GameScreen implements Screen {
         playerSprite.setY(playerPosition.y);
         //playerSprite.setX(100); // Set player sprite's x-coordinate to 0 (left side of the screen)
         //playerSprite.setY(Gdx.graphics.getHeight() / 2 - playerSprite.getHeight() / 2); // Set player sprite's y-coordinate to the middle of the screen
+        enemySprite.setX(enemyPosition.x);
+        enemySprite.setY(enemyPosition.y);
         spriteBatch.draw(background, backgroundX, 0);
         spriteBatch.draw(background, backgroundX+background.getWidth(), 0);
         playerSprite.draw(spriteBatch);
+        enemySprite.draw(spriteBatch);
         spriteBatch.end();
 
         backgroundX -= 1000 * dt;
@@ -279,6 +283,7 @@ public class GameScreen implements Screen {
 
         //Textures
         playerTexture = new Texture("Plane02/Moving/skeleton-MovingNIdle_0.png");
+        enemyTexture = new Texture("Enemy/Moving/skeleton-Moving_0.png");
         buttonSquareTexture = new Texture("buttons/buttonSquare_blue.png");
         buttonSquareDownTexture = new Texture("buttons/buttonSquare_beige_pressed.png");
         buttonLongTexture = new Texture("buttons/buttonLong_blue.png");
@@ -290,6 +295,13 @@ public class GameScreen implements Screen {
         playerDelta = new Vector2();
         playerDeltaRectangle = new Rectangle(0, 0, playerSprite.getWidth(), playerSprite.getHeight());
         playerPosition = new Vector2(100, Gdx.graphics.getHeight() / 2 - playerSprite.getHeight() / 2);
+
+        //Enemy
+        enemySprite = new Sprite(enemyTexture);
+        enemySprite.setSize(400, 400);
+        enemyDelta = new Vector2();
+        enemyDeltaRectangle = new Rectangle(0, 0, playerSprite.getWidth(), playerSprite.getHeight());
+        enemyPosition = new Vector2(w - enemySprite.getWidth() * 2, h / 2 - playerSprite.getHeight() / 2);
 
         //Buttons
         float buttonSize = h * 0.1f;
