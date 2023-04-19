@@ -17,7 +17,7 @@ public class GameScreen implements Screen {
     private OrthographicCamera camera;
     private Texture background;
     private MyGdxGame game;
-    public enum GameState { PLAYING, COMPLETE }
+    public enum GameState { PLAYING, COMPLETE, PAUSE }
     GameState gameState = GameState.PLAYING;
 
     public static final float MOVEMENT_SPEED = 400.0f;
@@ -57,6 +57,7 @@ public class GameScreen implements Screen {
     Texture buttonLongDownTexture;
     Texture buttonAttackTexture;
     Texture buttonAttackDownTexture;
+    Texture buttonPauseTexture;
 
     //UI Buttons
     Button moveLeftButton;
@@ -65,6 +66,7 @@ public class GameScreen implements Screen {
     Button moveUpButton;
     Button restartButton;
     Button attackButton;
+    Button pauseButton;
     boolean restartActive;
 
     float backgroundX = 0;
@@ -104,6 +106,7 @@ public class GameScreen implements Screen {
         missileTexture = new Texture("Missile.png");
         buttonAttackTexture = new Texture("buttons/Shoot_btn.png");
         buttonAttackDownTexture = new Texture("buttons/Bubble.png");
+        buttonPauseTexture = new Texture("buttons/Pause-Btn.png");
 
         //Player
         playerSprite = new Sprite(playerTexture);
@@ -133,6 +136,7 @@ public class GameScreen implements Screen {
         moveDownButton = new Button(buttonSize, 0.0f, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
         moveUpButton = new Button(buttonSize, buttonSize*2, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
         attackButton = new Button(screenWidth - 500, 200, buttonSize*2, buttonSize*2, buttonAttackTexture, buttonAttackDownTexture);
+        pauseButton = new Button(screenWidth - buttonSize*2, screenHeight - buttonSize*2, buttonSize, buttonSize, buttonPauseTexture, buttonPauseTexture);
         restartButton = new Button(screenWidth/2 - buttonSize*2, screenHeight * 0.2f, buttonSize*4, buttonSize, buttonLongTexture, buttonLongDownTexture);
 
         //Background Music
@@ -145,62 +149,70 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        dt = Gdx.graphics.getDeltaTime();
-        //Update the Game State
-        update();
-
-        //Clear the screen every frame before drawing.
-        Gdx.gl.glClearColor(0, 0, 0, 1);
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA); //Allows transparent sprites/tiles
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        camera.update();
-        spriteBatch.setProjectionMatrix(camera.combined);
-        spriteBatch.begin();
-        //playerSprite.setPosition(100,100);
-
-        //playerSprite.setX(100); // Set player sprite's x-coordinate to 0 (left side of the screen)
-        //playerSprite.setY(Gdx.graphics.getHeight() / 2 - playerSprite.getHeight() / 2); // Set player sprite's y-coordinate to the middle of the screen
-        spriteBatch.draw(background, backgroundX, 0);  //first background
-        spriteBatch.draw(background, backgroundX+background.getWidth(), 0); //second background
-
-        playerSprite.setX(playerPosition.x);
-        playerSprite.setY(playerPosition.y);
-        playerSprite.draw(spriteBatch);
-
-        enemySprite.setX(enemyPosition.x);
-        enemySprite.setY(enemyPosition.y);
-        enemySprite.draw(spriteBatch);
-        updateEnemy();
-
-        missileSprite.setX(playerPosition.x + playerSprite.getWidth());
-        missileSprite.setY(playerPosition.y);
-        missileSprite.draw(spriteBatch);
-
-        spriteBatch.end();
-
-        backgroundX -= 800 * dt; //background movement speed
-        //Reposition the background when it goes out of scope
-        if(backgroundX < -background.getWidth()){
-            backgroundX += background.getWidth();
-        }
-        //Draw UI
-        uiBatch.begin();
         switch(gameState) {
             //if gameState is Running: Draw Controls
             case PLAYING: {
+                dt = Gdx.graphics.getDeltaTime();
+                //Update the Game State
+                update();
+
+                //Clear the screen every frame before drawing.
+                Gdx.gl.glClearColor(0, 0, 0, 1);
+                Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA); //Allows transparent sprites/tiles
+                Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+                camera.update();
+                spriteBatch.setProjectionMatrix(camera.combined);
+                spriteBatch.begin();
+                //playerSprite.setPosition(100,100);
+
+                //playerSprite.setX(100); // Set player sprite's x-coordinate to 0 (left side of the screen)
+                //playerSprite.setY(Gdx.graphics.getHeight() / 2 - playerSprite.getHeight() / 2); // Set player sprite's y-coordinate to the middle of the screen
+                spriteBatch.draw(background, backgroundX, 0);  //first background
+                spriteBatch.draw(background, backgroundX+background.getWidth(), 0); //second background
+
+                playerSprite.setX(playerPosition.x);
+                playerSprite.setY(playerPosition.y);
+                playerSprite.draw(spriteBatch);
+
+                enemySprite.setX(enemyPosition.x);
+                enemySprite.setY(enemyPosition.y);
+                enemySprite.draw(spriteBatch);
+                updateEnemy();
+
+                missileSprite.setX(playerPosition.x + playerSprite.getWidth());
+                missileSprite.setY(playerPosition.y);
+                missileSprite.draw(spriteBatch);
+
+                spriteBatch.end();
+
+                backgroundX -= 800 * dt; //background movement speed
+                //Reposition the background when it goes out of scope
+                if(backgroundX < -background.getWidth()){
+                    backgroundX += background.getWidth();
+                }
+                //Draw UI
+                uiBatch.begin();
                 moveLeftButton.draw(uiBatch);
                 moveRightButton.draw(uiBatch);
                 moveDownButton.draw(uiBatch);
                 moveUpButton.draw(uiBatch);
                 attackButton.draw(uiBatch);
+                pauseButton.draw(uiBatch);
+                uiBatch.end();
             } break;
             //if gameState is Complete: Draw Restart button
             case COMPLETE: {
+                uiBatch.begin();
                 restartButton.draw(uiBatch);
+                uiBatch.end();
             } break;
+            case PAUSE: {
+                pause();
+                Gdx.app.log("GameScreen render: ", "PAUSE");
+                //TODO draw resume button, and update to listen if it's pressed then call resume()
+            }
         }
-        uiBatch.end();
     }
 
     /**Method for all game logic. This method is called at the start of GameCore.render() below. */
