@@ -58,6 +58,7 @@ public class GameScreen implements Screen {
     Texture buttonLongTexture;
     Texture buttonLongDownTexture;
     Texture buttonAttackTexture;
+    Texture buttonAttackDownTexture;
 
     //UI Buttons
     Button moveLeftButton;
@@ -121,6 +122,7 @@ public class GameScreen implements Screen {
         spriteBatch.end();
 
         backgroundX -= 1000 * dt;
+        //Reposition the background when it goes out of scope
         if(backgroundX < -background.getWidth()){
             backgroundX += background.getWidth();
         }
@@ -133,7 +135,7 @@ public class GameScreen implements Screen {
                 moveRightButton.draw(uiBatch);
                 moveDownButton.draw(uiBatch);
                 moveUpButton.draw(uiBatch);
-
+                attackButton.draw(uiBatch);
             } break;
             //if gameState is Complete: Draw Restart button
             case COMPLETE: {
@@ -308,7 +310,8 @@ public class GameScreen implements Screen {
         buttonLongTexture = new Texture("buttons/buttonLong_blue.png");
         buttonLongDownTexture = new Texture("buttons/buttonLong_beige_pressed.png");
         missileTexture = new Texture("Missile.png");
-        //buttonAttackTexture = new Texture("buttons/buttonLong_blue.png");
+        buttonAttackTexture = new Texture("buttons/buttonSquare_blue.png");
+        buttonAttackDownTexture = new Texture("buttons/buttonSquare_beige_pressed.png");
 
         //Player
         playerSprite = new Sprite(playerTexture);
@@ -337,7 +340,7 @@ public class GameScreen implements Screen {
         moveRightButton = new Button(buttonSize*2, buttonSize, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
         moveDownButton = new Button(buttonSize, 0.0f, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
         moveUpButton = new Button(buttonSize, buttonSize*2, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
-        //attackButton = new Button(screenWidth/2 - buttonSize*2, screenHeight * 0.2f, buttonSize*4, buttonSize, buttonAttackTexture, buttonAttackTexture);
+        attackButton = new Button(screenWidth - 500, 200, buttonSize*2, buttonSize*2, buttonAttackTexture, buttonAttackDownTexture);
         restartButton = new Button(screenWidth/2 - buttonSize*2, screenHeight * 0.2f, buttonSize*4, buttonSize, buttonLongTexture, buttonLongDownTexture);
 
         //Background Music
