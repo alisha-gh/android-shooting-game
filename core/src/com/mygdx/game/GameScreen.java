@@ -21,11 +21,10 @@ public class GameScreen implements Screen {
     private MyGdxGame game;
     public enum GameState { PLAYING, COMPLETE, PAUSE }
     GameState gameState = GameState.PLAYING;
+    boolean restartActive;
 
     public static final float MOVEMENT_SPEED = 400.0f;
-
-    //Game clock
-    float dt;
+    float dt; //Game clock
 
     //Player Character
     Texture playerTexture;
@@ -69,9 +68,9 @@ public class GameScreen implements Screen {
     Button restartButton;
     Button attackButton;
     Button pauseButton;
-    boolean restartActive;
-
     boolean shootButtonWasPressed = false;
+
+    //a list of missiles
     ArrayList<Vector2> missiles = new ArrayList<Vector2>();
 
     long lastEnemyCreatedTime = 0;
@@ -210,7 +209,7 @@ public class GameScreen implements Screen {
                 pauseButton.draw(uiBatch);
                 uiBatch.end();
             } break;
-            //if gameState is Complete: Draw Restart button
+            //If gameState is Complete: Draw Restart button
             case COMPLETE: {
                 uiBatch.begin();
                 restartButton.draw(uiBatch);
@@ -402,11 +401,7 @@ public class GameScreen implements Screen {
 
         dt = 0.0f;
 
-        //Player start location
-        //TODO playerSprite.getWidth / 2
-        playerSprite.setCenter(100,100); //TODO
-        //camera.translate(playerSprite.getX(), playerSprite.getY());
-
+        playerSprite.setCenter(playerSprite.getWidth()/2,playerSprite.getWidth()/2);
         restartActive = false;
     }
 
