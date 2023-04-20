@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.Vector2;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Vector;
 
 public class GameScreen implements Screen {
     private OrthographicCamera camera;
@@ -290,7 +291,7 @@ public class GameScreen implements Screen {
                     }else{
                         enemies.get(i).add(new Vector2(-500*dt*difficulty, 0));
                     }
-                    if (enemies.get(i).x < -200) { //Remove the enemy when it's out of camera
+                    if (enemies.get(i).x < -400) { //Remove the enemy when it's out of camera
                         enemiesToRemove.add(enemies.get(i));
                     }
                 }
@@ -298,12 +299,21 @@ public class GameScreen implements Screen {
                 for (int i = 0; i < missiles.size(); i++) {
                     //Move Missile
                     missiles.get(i).add(500 * dt, 0);
-                    if (missiles.get(i).x > camera.viewportWidth + 2000) { //Remove the missiles when it's out of camera
+                    if (missiles.get(i).x > camera.viewportWidth + 200) { //Remove the missiles when it's out of camera
                         missilesToRemove.add(missiles.get(i));
                     }
                 }
 
                 //Detect Collisions
+                for(Vector2 enemy : enemies){
+                    Gdx.app.log("Player Vector ", String.valueOf(playerPosition));
+                    if (enemy.dst(playerPosition) < 500){
+                        Gdx.app.log("Player and Enemy ", "Collision");
+                        enemiesToRemove.add(enemy);
+                        gameState = GameState.COMPLETE;
+                    }
+                }
+
                 for(Vector2 missile : missiles){
                     for(Vector2 enemy : enemies){
                         if (missile.dst(enemy) < 200) {
