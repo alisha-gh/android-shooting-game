@@ -13,6 +13,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
+import java.util.ArrayList;
+
 public class GameScreen implements Screen {
     private OrthographicCamera camera;
     private Texture background;
@@ -69,6 +71,11 @@ public class GameScreen implements Screen {
     Button pauseButton;
     boolean restartActive;
 
+    boolean shootButtonWasPressed = false;
+    ArrayList<Vector2> missiles = new ArrayList<Vector2>();
+
+    long lastEnemyCreatedTime = 0;
+
     float backgroundX = 0;
 
     private Music backgroundMusic;
@@ -124,7 +131,7 @@ public class GameScreen implements Screen {
 
         //Missile
         missileSprite = new Sprite(missileTexture);
-        missileSprite.setSize(80, 80);
+        missileSprite.setSize(160, 80);
         missileDelta = new Vector2();
         missileDeltaRectangle = new Rectangle(0, 0, missileSprite.getWidth(), missileSprite.getHeight());
         missilePosition = new Vector2(playerPosition.x + playerSprite.getWidth(), 1000);
@@ -180,9 +187,11 @@ public class GameScreen implements Screen {
                 enemySprite.draw(spriteBatch);
                 updateEnemy();
 
-                missileSprite.setX(playerPosition.x + playerSprite.getWidth());
-                missileSprite.setY(playerPosition.y);
-                missileSprite.draw(spriteBatch);
+                for (int i=0; i < this.missiles.size(); i++) {
+                    missileSprite.setX(this.missiles.get(i).x);
+                    missileSprite.setY(this.missiles.get(i).y);
+                    missileSprite.draw(spriteBatch);
+                }
 
                 spriteBatch.end();
 
@@ -253,8 +262,15 @@ public class GameScreen implements Screen {
                     moveY += 1;
                 }
                 if (Gdx.input.isKeyPressed(Input.Keys.SPACE) || attackButton.isDown) {
-                    attackButton.isDown = true;
-                    Gdx.app.log("Attack Button is Pressed", String.valueOf(attackButton.isDown));
+                    if (!this.shootButtonWasPressed) {
+                        attackButton.isDown = true;
+                        Gdx.app.log("Attack Button is Pressed", String.valueOf(attackButton.isDown));
+                        this.shootButtonWasPressed = true;
+                        this.missiles.add(new Vector2(playerPosition.x + playerSprite.getWidth(), playerPosition.y));
+                    }
+                }
+                else {
+                    this.shootButtonWasPressed = false;
                 }
                 if (Gdx.input.isKeyPressed(Input.Keys.ENTER) || pauseButton.isDown) {
                     pauseButton.isDown = true;
@@ -265,6 +281,25 @@ public class GameScreen implements Screen {
                 //Determine Character Movement Distance
                 playerDelta.x = moveX * MOVEMENT_SPEED * dt;
                 playerDelta.y = moveY * MOVEMENT_SPEED * dt;
+
+                if (System.currentTimeMillis() > this.lastEnemyCreatedTime + 1000) {
+                    this.lastEnemyCreatedTime = System.currentTimeMillis();
+                }
+
+                ArrayList<Vector2> missilesToRemove = new ArrayList<Vector2>();
+                for (int i = 0; i < this.missiles.size(); i++) {
+                    this.missiles.get(i).add(500 * dt, 0);
+                    if (this.missiles.get(i).x > this.camera.viewportWidth + 200) {
+                        missilesToRemove.add(this.missiles.get(i));
+                    }
+
+                    //if (this.missiles.get(i).dst(this.enemies.get(j)) < 200)
+                    //TODO 200 is the enemy's size
+                }
+                for (int i = 0; i < missilesToRemove.size(); i++) {
+                    this.missiles.remove(missilesToRemove.get(i));
+                }
+
 
                 //TODO Check movement against grid
                 if (playerDelta.len2() > 0) { //Don't do anything if we're not moving
@@ -368,8 +403,9 @@ public class GameScreen implements Screen {
         dt = 0.0f;
 
         //Player start location
+        //TODO playerSprite.getWidth / 2
         playerSprite.setCenter(100,100); //TODO
-        camera.translate(playerSprite.getX(), playerSprite.getY());
+        //camera.translate(playerSprite.getX(), playerSprite.getY());
 
         restartActive = false;
     }
