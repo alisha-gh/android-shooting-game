@@ -286,32 +286,44 @@ public class GameScreen implements Screen {
                     enemies.add(new Vector2(camera.viewportWidth + enemySprite.getWidth() * 2 * randomNum, camera.viewportHeight/randomNum));
                 }
 
+                ArrayList<Vector2> enemiesToRemove = new ArrayList<Vector2>();
                 for(int i = 0; i < enemies.size(); i++){
                     float xPos = enemies.get(i).x;
-                    float difficulty = enemies.size()/2;
+                    //float difficulty = enemies.size()/2;
+                    float difficulty = 1;
                     if(xPos < camera.viewportWidth/2){
                         enemies.get(i).add(new Vector2(-600*dt*difficulty, 0));
                     }else{
                         enemies.get(i).add(new Vector2(-500*dt*difficulty, 0));
                     }
+                    if (enemies.get(i).x < -200) { //Remove the enemy when it's out of camera
+                        enemiesToRemove.add(enemies.get(i));
+                    }
+                }
+                ArrayList<Vector2> missilesToRemove = new ArrayList<Vector2>();
+                for (int i = 0; i < missiles.size(); i++) {
+                    //Move Missile
+                    missiles.get(i).add(500 * dt, 0);
+                    if (missiles.get(i).x > camera.viewportWidth + 2000) { //Remove the missiles when it's out of camera
+                        missilesToRemove.add(missiles.get(i));
+                    }
                 }
 
-                //Remove Missiles that's out of viewport safely
-                ArrayList<Vector2> missilesToRemove = new ArrayList<Vector2>();
-                for (int i = 0; i < this.missiles.size(); i++) {
-                    missiles.get(i).add(500 * dt, 0);
-                    if (this.missiles.get(i).x > this.camera.viewportWidth + 200) {
-                        missilesToRemove.add(this.missiles.get(i));
-                    }
-                    //Detect Collisions
-                    if (this.missiles.get(i).dst(enemyPosition) < 200){
-                        //TODO 200 is the enemy's size
-                        //TODO Remove Enemy
-                        Gdx.app.log("Collision!", "");
+                //Detect Collisions
+                for(Vector2 missile : missiles){
+                    for(Vector2 enemy : enemies){
+                        if (missile.dst(enemy) < 200) {
+                            //200 is the enemy's size
+                            enemiesToRemove.add(enemy);
+                            missilesToRemove.add(missile);
+                        }
                     }
                 }
-                for (int i = 0; i < missilesToRemove.size(); i++) {
-                    this.missiles.remove(missilesToRemove.get(i));
+                for (Vector2 missile : missilesToRemove) {
+                    missiles.remove(missile);
+                }
+                for (Vector2 enemy : enemiesToRemove) {
+                    enemies.remove(enemy);
                 }
 
 
