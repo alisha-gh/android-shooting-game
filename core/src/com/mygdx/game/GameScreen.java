@@ -65,6 +65,7 @@ public class GameScreen implements Screen {
     Button attackButton;
     Button pauseButton;
     boolean shootButtonWasPressed = false;
+    boolean pauseButtonWasPressed = false;
 
     //a list of missiles
     ArrayList<Vector2> missiles = new ArrayList<Vector2>();
@@ -148,12 +149,13 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
+        dt = Gdx.graphics.getDeltaTime();
+        update();
+
         switch(gameState) {
             //if gameState is Running: Draw Controls
             case PLAYING: {
-                dt = Gdx.graphics.getDeltaTime();
                 //Update the Game State
-                update();
 
                 //Clear the screen every frame before drawing.
                 Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -207,32 +209,32 @@ public class GameScreen implements Screen {
                 uiBatch.end();
             } break;
             case PAUSE: {
-                pause();
+                update();
+                buttonPauseTexture = new Texture("buttons/Play-Btn.png"); //TODO draw resume button
                 Gdx.app.log("GameScreen render: ", "PAUSE");
-                //TODO draw resume button, and update to listen if it's pressed then call resume()
+
             }
         }
     }
 
     /**Method for all game logic. This method is called at the start of GameCore.render() below. */
     private void update() {
+        Gdx.app.log("GameScreen update", "");
         //Touch Input Info
         boolean checkTouch = Gdx.input.isTouched();
         int touchX = Gdx.input.getX();
         int touchY = Gdx.input.getY();
+        //Poll user for input
+        moveLeftButton.update(checkTouch, touchX, touchY);
+        moveRightButton.update(checkTouch, touchX, touchY);
+        moveDownButton.update(checkTouch, touchX, touchY);
+        moveUpButton.update(checkTouch, touchX, touchY);
+        attackButton.update(checkTouch, touchX, touchY);
+        pauseButton.update(checkTouch, touchX, touchY);
 
         //Update Game State based on input
         switch (gameState) {
-
-            case PLAYING:
-                //Poll user for input
-                moveLeftButton.update(checkTouch, touchX, touchY);
-                moveRightButton.update(checkTouch, touchX, touchY);
-                moveDownButton.update(checkTouch, touchX, touchY);
-                moveUpButton.update(checkTouch, touchX, touchY);
-                attackButton.update(checkTouch, touchX, touchY);
-                pauseButton.update(checkTouch, touchX, touchY);
-
+            case PLAYING: {
                 int moveX = 0;
                 int moveY = 0;
                 if (moveLeftButton.isDown) {
@@ -262,9 +264,10 @@ public class GameScreen implements Screen {
                 else {
                     this.shootButtonWasPressed = false;
                 }
-                if (Gdx.input.isKeyPressed(Input.Keys.ENTER) || pauseButton.isDown) {
-                    pauseButton.isDown = true;
+                if (pauseButton.justPressed()) {
                     gameState = GameState.PAUSE;
+                    pauseButton.isDown = false;
+                    pauseButton.isDownPrev = true;
                     Gdx.app.log("Pause Button is Pressed", String.valueOf(pauseButton.isDown));
                 }
 
@@ -314,9 +317,17 @@ public class GameScreen implements Screen {
 //                }
 //                overheadOpacity = MathUtils.clamp(overheadOpacity, 0.0f, 1.0f);
 
+            }
                 break;
-
-            case COMPLETE:
+            case PAUSE: {
+                Gdx.app.log("GameScreen update", "PAUSE");
+                if(pauseButton.justPressed()){
+                    gameState = GameState.PLAYING;
+                    Gdx.app.log("Pause Button is Pressed again", String.valueOf(pauseButton.isDown));
+                }
+            }
+                break;
+            case COMPLETE: {
                 //Poll for input
                 restartButton.update(checkTouch, touchX, touchY);
 
@@ -326,6 +337,7 @@ public class GameScreen implements Screen {
                 } else if (restartActive) {
                     newGame();
                 }
+            }
                 break;
         }
     }
