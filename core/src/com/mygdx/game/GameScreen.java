@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 import java.util.ArrayList;
@@ -30,7 +29,6 @@ public class GameScreen implements Screen {
     Texture playerTexture;
     Sprite playerSprite;
     Vector2 playerDelta;
-    Rectangle playerDeltaRectangle;
     Vector2 playerPosition;
 
 
@@ -38,14 +36,12 @@ public class GameScreen implements Screen {
     Texture enemyTexture;
     Sprite enemySprite;
     Vector2 enemyDelta;
-    Rectangle enemyDeltaRectangle;
     Vector2 enemyPosition;
 
     //Missile
     Texture missileTexture;
     Sprite missileSprite;
     Vector2 missileDelta;
-    Rectangle missileDeltaRectangle;
     Vector2 missilePosition;
 
     SpriteBatch spriteBatch;
@@ -118,21 +114,18 @@ public class GameScreen implements Screen {
         playerSprite = new Sprite(playerTexture);
         playerSprite.setSize(480, 480);
         playerDelta = new Vector2();
-        playerDeltaRectangle = new Rectangle(0, 0, playerSprite.getWidth(), playerSprite.getHeight());
         playerPosition = new Vector2(100, screenHeight / 2 - playerSprite.getHeight() / 2);
 
         //Enemy
         enemySprite = new Sprite(enemyTexture);
         enemySprite.setSize(400, 400);
         enemyDelta = new Vector2();
-        enemyDeltaRectangle = new Rectangle(0, 0, playerSprite.getWidth(), playerSprite.getHeight());
         enemyPosition = new Vector2(viewportWidth - enemySprite.getWidth() * 2, screenHeight / 2 - playerSprite.getHeight() / 2);
 
         //Missile
         missileSprite = new Sprite(missileTexture);
         missileSprite.setSize(160, 80);
         missileDelta = new Vector2();
-        missileDeltaRectangle = new Rectangle(0, 0, missileSprite.getWidth(), missileSprite.getHeight());
         missilePosition = new Vector2(playerPosition.x + playerSprite.getWidth(), 1000);
 
         //Buttons
@@ -170,8 +163,6 @@ public class GameScreen implements Screen {
                 camera.update();
                 spriteBatch.setProjectionMatrix(camera.combined);
                 spriteBatch.begin();
-                //playerSprite.setPosition(100,100);
-
                 //playerSprite.setX(100); // Set player sprite's x-coordinate to 0 (left side of the screen)
                 //playerSprite.setY(Gdx.graphics.getHeight() / 2 - playerSprite.getHeight() / 2); // Set player sprite's y-coordinate to the middle of the screen
                 spriteBatch.draw(background, backgroundX, 0);  //first background
@@ -244,23 +235,23 @@ public class GameScreen implements Screen {
 
                 int moveX = 0;
                 int moveY = 0;
-                if (Gdx.input.isKeyPressed(Input.Keys.DPAD_LEFT) || moveLeftButton.isDown) {
+                if (moveLeftButton.isDown) {
                     moveLeftButton.isDown = true;
                     moveX -= 1;
                 }
-                if (Gdx.input.isKeyPressed(Input.Keys.DPAD_RIGHT) || moveRightButton.isDown) {
+                if (moveRightButton.isDown) {
                     moveRightButton.isDown = true;
                     moveX += 1;
                 }
-                if (Gdx.input.isKeyPressed(Input.Keys.DPAD_DOWN) || moveDownButton.isDown) {
+                if (moveDownButton.isDown) {
                     moveDownButton.isDown = true;
                     moveY -= 1;
                 }
-                if (Gdx.input.isKeyPressed(Input.Keys.DPAD_UP) || moveUpButton.isDown) {
+                if (moveUpButton.isDown) {
                     moveUpButton.isDown = true;
                     moveY += 1;
                 }
-                if (Gdx.input.isKeyPressed(Input.Keys.SPACE) || attackButton.isDown) {
+                if (attackButton.isDown) {
                     if (!this.shootButtonWasPressed) {
                         attackButton.isDown = true;
                         Gdx.app.log("Attack Button is Pressed", String.valueOf(attackButton.isDown));
@@ -281,10 +272,11 @@ public class GameScreen implements Screen {
                 playerDelta.x = moveX * MOVEMENT_SPEED * dt;
                 playerDelta.y = moveY * MOVEMENT_SPEED * dt;
 
+                //Generate Enemies every second
                 if (System.currentTimeMillis() > this.lastEnemyCreatedTime + 1000) {
                     this.lastEnemyCreatedTime = System.currentTimeMillis();
                 }
-
+                //Remove Missiles that's out of viewport safely
                 ArrayList<Vector2> missilesToRemove = new ArrayList<Vector2>();
                 for (int i = 0; i < this.missiles.size(); i++) {
                     this.missiles.get(i).add(500 * dt, 0);
@@ -300,45 +292,8 @@ public class GameScreen implements Screen {
                 }
 
 
-                //TODO Check movement against grid
+                //Check movement against grid
                 if (playerDelta.len2() > 0) { //Don't do anything if we're not moving
-
-                    //TODO Determine bounds to check within
-                    // Find top-right corner tile
-                    int right = (int) Math.ceil(Math.max(playerSprite.getX() + playerSprite.getWidth(),playerSprite.getX() + playerSprite.getWidth() + playerDelta.x));
-                    int top = (int) Math.ceil(Math.max(playerSprite.getY() + playerSprite.getHeight(),playerSprite.getY() + playerSprite.getHeight() + playerDelta.y));
-
-                    // Find bottom-left corner tile
-                    int left = (int) Math.floor(Math.min(playerSprite.getX(),playerSprite.getX() + playerDelta.x));
-                    int bottom = (int) Math.floor(Math.min(playerSprite.getY(),playerSprite.getY() + playerDelta.y));
-
-                    // Divide bounds by tile sizes to retrieve tile indices
-                    //right /= tileLayer.getTileWidth();
-                    //top /= tileLayer.getTileHeight();
-                    //left /= tileLayer.getTileWidth();
-                    //bottom /= tileLayer.getTileHeight();
-
-                    //TODO Loop through selected tiles and correct by each axis
-                    //EXTRA: Try counting down if moving left or down instead of counting up
-                    for (int y = bottom; y <= top; y++) {
-                        for (int x = left; x <= right; x++) {
-                            //TiledMapTileLayer.Cell targetCell = tileLayer.getCell(x, y);
-                            // If the cell is empty, ignore it
-                            //if (targetCell == null) continue;
-                            // Otherwise correct against tested squares
-                            //tileRectangle.x = x * tileLayer.getTileWidth();
-                            //tileRectangle.y = y * tileLayer.getTileHeight();
-
-                            playerDeltaRectangle.x = playerSprite.getX() + playerDelta.x;
-                            playerDeltaRectangle.y = playerSprite.getY();
-                            //if (tileRectangle.overlaps(playerDeltaRectangle)) playerDelta.x = 0;
-
-                            playerDeltaRectangle.x = playerSprite.getX();
-                            playerDeltaRectangle.y = playerSprite.getY() + playerDelta.y;
-                            //if (tileRectangle.overlaps(playerDeltaRectangle)) playerDelta.y = 0;
-                        }
-                    }
-
                     //Move player
                     playerPosition.x += playerDelta.x;
                     playerPosition.y += playerDelta.y;
