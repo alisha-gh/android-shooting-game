@@ -29,20 +29,18 @@ public class GameScreen implements Screen {
     //Player Character
     Texture playerTexture;
     Sprite playerSprite;
-    Vector2 playerDelta;
+    Vector2 playerVector;
     Vector2 playerPosition;
 
 
     //Enemy Character
     Texture enemyTexture;
     Sprite enemySprite;
-    Vector2 enemyDelta;
     Vector2 enemyPosition;
 
     //Missile
     Texture missileTexture;
     Sprite missileSprite;
-    Vector2 missileDelta;
     Vector2 missilePosition;
 
     SpriteBatch spriteBatch;
@@ -117,19 +115,17 @@ public class GameScreen implements Screen {
         //Player
         playerSprite = new Sprite(playerTexture);
         playerSprite.setSize(480, 480);
-        playerDelta = new Vector2();
+        playerVector = new Vector2();
         playerPosition = new Vector2(100, screenHeight / 2 - playerSprite.getHeight() / 2);
 
         //Enemy
         enemySprite = new Sprite(enemyTexture);
         enemySprite.setSize(400, 400);
-        enemyDelta = new Vector2();
         enemyPosition = new Vector2(viewportWidth - enemySprite.getWidth() * 2, screenHeight / 2 - playerSprite.getHeight() / 2);
 
         //Missile
         missileSprite = new Sprite(missileTexture);
         missileSprite.setSize(160, 80);
-        missileDelta = new Vector2();
         missilePosition = new Vector2(playerPosition.x + playerSprite.getWidth(), 1000);
 
         //Buttons
@@ -158,8 +154,6 @@ public class GameScreen implements Screen {
         switch(gameState) {
             //if gameState is Running: Draw Controls
             case PLAYING: {
-                //Update the Game State
-
                 //Clear the screen every frame before drawing.
                 Gdx.gl.glClearColor(0, 0, 0, 1);
                 Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA); //Allows transparent sprites/tiles
@@ -275,8 +269,8 @@ public class GameScreen implements Screen {
                 }
 
                 //Determine Character Movement Distance
-                playerDelta.x = moveX * MOVEMENT_SPEED * dt;
-                playerDelta.y = moveY * MOVEMENT_SPEED * dt;
+                playerVector.x = moveX * MOVEMENT_SPEED * dt;
+                playerVector.y = moveY * MOVEMENT_SPEED * dt;
 
                 //Generate Enemies every second
                 Random random = new Random();
@@ -328,11 +322,11 @@ public class GameScreen implements Screen {
 
 
                 //Check movement against grid
-                if (playerDelta.len2() > 0) { //Don't do anything if we're not moving
+                if (playerVector.len2() > 0) { //Don't do anything if we're not moving
                     //Move player
-                    playerPosition.x += playerDelta.x;
-                    playerPosition.y += playerDelta.y;
-                    playerSprite.translate(playerDelta.x, playerDelta.y);
+                    playerPosition.x += playerVector.x;
+                    playerPosition.y += playerVector.y;
+                    playerSprite.translate(playerVector.x, playerVector.y);
                 }
 
                 //TODO Check if player has met the winning condition
