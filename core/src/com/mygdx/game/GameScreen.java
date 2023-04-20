@@ -223,7 +223,6 @@ public class GameScreen implements Screen {
 
     /**Method for all game logic. This method is called at the start of GameCore.render() below. */
     private void update() {
-        Gdx.app.log("GameScreen update", "");
         //Touch Input Info
         boolean checkTouch = Gdx.input.isTouched();
         int touchX = Gdx.input.getX();
@@ -286,11 +285,16 @@ public class GameScreen implements Screen {
                     lastEnemyCreatedTime = System.currentTimeMillis();
                     enemies.add(new Vector2(camera.viewportWidth + enemySprite.getWidth() * 2 * randomNum, camera.viewportHeight/randomNum));
                 }
-                //Translate enemies to the left
-                for(int i = 0; i < enemies.size(); i++){
-                    enemies.get(i).add(new Vector2(-1000*dt, 0));
-                }
 
+                for(int i = 0; i < enemies.size(); i++){
+                    float xPos = enemies.get(i).x;
+                    float difficulty = enemies.size()/2;
+                    if(xPos < camera.viewportWidth/2){
+                        enemies.get(i).add(new Vector2(-600*dt*difficulty, 0));
+                    }else{
+                        enemies.get(i).add(new Vector2(-500*dt*difficulty, 0));
+                    }
+                }
 
                 //Remove Missiles that's out of viewport safely
                 ArrayList<Vector2> missilesToRemove = new ArrayList<Vector2>();
