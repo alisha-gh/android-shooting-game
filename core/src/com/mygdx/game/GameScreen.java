@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class GameScreen implements Screen {
     private OrthographicCamera camera;
@@ -67,8 +68,10 @@ public class GameScreen implements Screen {
     boolean shootButtonWasPressed = false;
     boolean pauseButtonWasPressed = false;
 
-    //a list of missiles
+    //A list of Missiles
     ArrayList<Vector2> missiles = new ArrayList<Vector2>();
+    //A list of Enemies
+    ArrayList<Vector2> enemies = new ArrayList<Vector2>();
 
     long lastEnemyCreatedTime = 0;
 
@@ -174,14 +177,15 @@ public class GameScreen implements Screen {
                 playerSprite.setY(playerPosition.y);
                 playerSprite.draw(spriteBatch);
 
-                enemySprite.setX(enemyPosition.x);
-                enemySprite.setY(enemyPosition.y);
-                enemySprite.draw(spriteBatch);
-                updateEnemy();
+                for (int i=0; i < enemies.size(); i++) {
+                    enemySprite.setX(enemies.get(i).x);
+                    enemySprite.setY(enemies.get(i).y);
+                    enemySprite.draw(spriteBatch);
+                }
 
                 for (int i=0; i < this.missiles.size(); i++) {
-                    missileSprite.setX(this.missiles.get(i).x);
-                    missileSprite.setY(this.missiles.get(i).y);
+                    missileSprite.setX(missiles.get(i).x);
+                    missileSprite.setY(missiles.get(i).y);
                     missileSprite.draw(spriteBatch);
                 }
 
@@ -276,19 +280,31 @@ public class GameScreen implements Screen {
                 playerDelta.y = moveY * MOVEMENT_SPEED * dt;
 
                 //Generate Enemies every second
-                if (System.currentTimeMillis() > this.lastEnemyCreatedTime + 1000) {
-                    this.lastEnemyCreatedTime = System.currentTimeMillis();
+                Random random = new Random();
+                int randomNum = random.nextInt(10);
+                if (System.currentTimeMillis() > lastEnemyCreatedTime + 2000) {
+                    lastEnemyCreatedTime = System.currentTimeMillis();
+                    enemies.add(new Vector2(camera.viewportWidth + enemySprite.getWidth() * 2 * randomNum, camera.viewportHeight/randomNum));
                 }
+                //Translate enemies to the left
+                for(int i = 0; i < enemies.size(); i++){
+                    enemies.get(i).add(new Vector2(-1000*dt, 0));
+                }
+
+
                 //Remove Missiles that's out of viewport safely
                 ArrayList<Vector2> missilesToRemove = new ArrayList<Vector2>();
                 for (int i = 0; i < this.missiles.size(); i++) {
-                    this.missiles.get(i).add(500 * dt, 0);
+                    missiles.get(i).add(500 * dt, 0);
                     if (this.missiles.get(i).x > this.camera.viewportWidth + 200) {
                         missilesToRemove.add(this.missiles.get(i));
                     }
-
-                    //if (this.missiles.get(i).dst(this.enemies.get(j)) < 200)
-                    //TODO 200 is the enemy's size
+                    //Detect Collisions
+                    if (this.missiles.get(i).dst(enemyPosition) < 200){
+                        //TODO 200 is the enemy's size
+                        //TODO Remove Enemy
+                        Gdx.app.log("Collision!", "");
+                    }
                 }
                 for (int i = 0; i < missilesToRemove.size(); i++) {
                     this.missiles.remove(missilesToRemove.get(i));
@@ -340,12 +356,6 @@ public class GameScreen implements Screen {
             }
                 break;
         }
-    }
-
-    private void updateEnemy(){
-        enemyDelta.x = MOVEMENT_SPEED * dt;
-        enemyPosition.x -= enemyDelta.x;
-        enemySprite.translate(enemyDelta.x, enemyDelta.y);
     }
 
     @Override
