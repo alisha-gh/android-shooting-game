@@ -116,13 +116,13 @@ public class GameScreen implements Screen {
 
         //Player
         playerSprite = new Sprite(playerTexture);
-        playerSprite.setSize(480, 480);
+        playerSprite.setSize(320, 320);
         playerVector = new Vector2();
         playerPosition = new Vector2(100, screenHeight / 2 - playerSprite.getHeight() / 2);
 
         //Enemy
         enemySprite = new Sprite(enemyTexture);
-        enemySprite.setSize(400, 400);
+        enemySprite.setSize(360, 360);
         enemySprite.setCenter(enemySprite.getWidth()/2,enemySprite.getWidth()/2);
         enemyPosition = new Vector2(viewportWidth - enemySprite.getWidth() * 2, screenHeight / 2 - playerSprite.getHeight() / 2);
 
@@ -154,64 +154,44 @@ public class GameScreen implements Screen {
         dt = Gdx.graphics.getDeltaTime();
         update();
 
-        //switch(gameState) {
-            //if gameState is Running: Draw Controls
-            //case PLAYING: {
-                //Clear the screen every frame before drawing.
-                Gdx.gl.glClearColor(0, 0, 0, 1);
-                Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA); //Allows transparent sprites/tiles
-                Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        //Clear the screen every frame before drawing.
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA); //Allows transparent sprites/tiles
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-                camera.update();
-                spriteBatch.setProjectionMatrix(camera.combined);
-                spriteBatch.begin();
-                //playerSprite.setX(100); // Set player sprite's x-coordinate to 0 (left side of the screen)
-                //playerSprite.setY(Gdx.graphics.getHeight() / 2 - playerSprite.getHeight() / 2); // Set player sprite's y-coordinate to the middle of the screen
-                spriteBatch.draw(background, backgroundX, 0);  //first background
-                spriteBatch.draw(background, backgroundX+background.getWidth(), 0); //second background
+        camera.update();
+        spriteBatch.setProjectionMatrix(camera.combined);
+        spriteBatch.begin();
+        spriteBatch.draw(background, backgroundX, 0);  //first background
+        spriteBatch.draw(background, backgroundX+background.getWidth(), 0); //second background
 
-                playerSprite.setX(playerPosition.x);
-                playerSprite.setY(playerPosition.y);
-                playerSprite.draw(spriteBatch);
+        playerSprite.setX(playerPosition.x);
+        playerSprite.setY(playerPosition.y);
+        playerSprite.draw(spriteBatch);
 
-                for (int i=0; i < enemies.size(); i++) {
-                    enemySprite.setX(enemies.get(i).x);
-                    enemySprite.setY(enemies.get(i).y);
-                    enemySprite.draw(spriteBatch);
-                }
+        for (int i=0; i < enemies.size(); i++) {
+            enemySprite.setX(enemies.get(i).x);
+            enemySprite.setY(enemies.get(i).y);
+            enemySprite.draw(spriteBatch);
+        }
 
-                for (int i=0; i < this.missiles.size(); i++) {
-                    missileSprite.setX(missiles.get(i).x);
-                    missileSprite.setY(missiles.get(i).y);
-                    missileSprite.draw(spriteBatch);
-                }
+        for (int i=0; i < this.missiles.size(); i++) {
+            missileSprite.setX(missiles.get(i).x);
+            missileSprite.setY(missiles.get(i).y);
+            missileSprite.draw(spriteBatch);
+        }
+        spriteBatch.end();
 
-                spriteBatch.end();
-                //Draw UI
-                uiBatch.begin();
-                moveLeftButton.draw(uiBatch);
-                moveRightButton.draw(uiBatch);
-                moveDownButton.draw(uiBatch);
-                moveUpButton.draw(uiBatch);
-                attackButton.draw(uiBatch);
-                pauseButton.draw(uiBatch);
-                uiBatch.end();
-
-                /*
-            } break;
-            //If gameState is Complete: Draw Restart button
-            case COMPLETE: {
-                uiBatch.begin();
-                restartButton.draw(uiBatch);
-                uiBatch.end();
-            } break;
-            case PAUSE: {
-                update();
-                Gdx.app.log("GameScreen render: ", "PAUSE");
-
-            }
-                 */
-        //}
+        //Draw UI
+        uiBatch.begin();
+        moveLeftButton.draw(uiBatch);
+        moveRightButton.draw(uiBatch);
+        moveDownButton.draw(uiBatch);
+        moveUpButton.draw(uiBatch);
+        attackButton.draw(uiBatch);
+        pauseButton.draw(uiBatch);
+        uiBatch.end();
+        //Complete
         if (gameState == GameState.COMPLETE) {
             uiBatch.begin();
             restartButton.draw(uiBatch);
@@ -233,20 +213,18 @@ public class GameScreen implements Screen {
         attackButton.update(checkTouch, touchX, touchY);
         pauseButton.update(checkTouch, touchX, touchY);
 
-
+        //Pause and Resume Button
         if (pauseButton.justPressed()) {
-            //if (!pauseButton.isDownPrev) {
-                if (gameState == GameState.PAUSE) {
-                    gameState = GameState.PLAYING;
-                    pauseButton.setTexture(buttonPauseTexture);
-                    Gdx.app.log("Pause Button is Pressed to play", String.valueOf(pauseButton.isDown));
-                }
-                else {
-                    gameState = GameState.PAUSE;
-                    pauseButton.setTexture(buttonPlayTexture);
-                    Gdx.app.log("Pause Button is Pressed to pause", String.valueOf(pauseButton.isDown));
-                }
-            //}
+            if (gameState == GameState.PAUSE) {
+                gameState = GameState.PLAYING;
+                pauseButton.setTexture(buttonPauseTexture);
+                Gdx.app.log("Pause Button is Pressed to play", String.valueOf(pauseButton.isDown));
+            }
+            else {
+                gameState = GameState.PAUSE;
+                pauseButton.setTexture(buttonPlayTexture);
+                Gdx.app.log("Pause Button is Pressed to pause", String.valueOf(pauseButton.isDown));
+            }
         }
 
         //Update Game State based on input
@@ -276,11 +254,9 @@ public class GameScreen implements Screen {
                     attackButton.isDownPrev = true;
                     this.missiles.add(new Vector2(playerPosition.x + playerSprite.getWidth(), playerPosition.y));
                 }
-                else {
-                    this.shootButtonWasPressed = false;
-                }
 
-                backgroundX -= 800 * dt; //background movement speed
+                //Move Background
+                backgroundX -= 800 * dt;
                 //Reposition the background when it goes out of scope
                 if(backgroundX < -background.getWidth()){
                     backgroundX += background.getWidth();
@@ -289,6 +265,13 @@ public class GameScreen implements Screen {
                 //Determine Character Movement Distance
                 playerVector.x = moveX * MOVEMENT_SPEED * dt;
                 playerVector.y = moveY * MOVEMENT_SPEED * dt;
+                //Check movement against grid
+                if (playerVector.len2() > 0) { //Don't do anything if we're not moving
+                    //Move player
+                    playerPosition.x += playerVector.x;
+                    playerPosition.y += playerVector.y;
+                    playerSprite.translate(playerVector.x, playerVector.y);
+                }
 
                 //Generate Enemies every second
                 Random random = new Random();
@@ -321,7 +304,7 @@ public class GameScreen implements Screen {
                     }
                 }
 
-                //Detect Collisions
+                //Detect Player and Enemies Collisions
 //                for(Vector2 enemy : enemies){
 //                    Gdx.app.log("Player Vector ", String.valueOf(playerPosition));
 //                    if (enemy.dst(playerPosition) < 500){
@@ -330,7 +313,7 @@ public class GameScreen implements Screen {
 //                        gameState = GameState.COMPLETE;
 //                    }
 //                }
-
+                //Detect Enemies and Missiles Collisions
                 for(Vector2 missile : missiles){
                     for(Vector2 enemy : enemies){
                         if (missile.dst(new Vector2(enemy.x + (enemyTexture.getWidth() / 2), enemy.y + (enemyTexture.getHeight() / 2))) < 200) {
@@ -340,38 +323,16 @@ public class GameScreen implements Screen {
                         }
                     }
                 }
+
+                //Remove
                 for (Vector2 missile : missilesToRemove) {
                     missiles.remove(missile);
                 }
                 for (Vector2 enemy : enemiesToRemove) {
                     enemies.remove(enemy);
                 }
-
-
-                //Check movement against grid
-                if (playerVector.len2() > 0) { //Don't do anything if we're not moving
-                    //Move player
-                    playerPosition.x += playerVector.x;
-                    playerPosition.y += playerVector.y;
-                    playerSprite.translate(playerVector.x, playerVector.y);
-                }
             }
-                break;
-            case PAUSE: {
-                Gdx.app.log("GameScreen update", "PAUSE");
-                /*
-                if(pauseButton.isDown){
-                    if (!pauseButton.isDownPrev) {
-                        pauseButton.isDown = true;
-                        pauseButton.isDownPrev = true;
-                        gameState = GameState.PLAYING;
-                        Gdx.app.log("Pause Button is Pressed", String.valueOf(pauseButton.isDown));
-                    }
-                    Gdx.app.log("Pause Button is Pressed again", String.valueOf(pauseButton.isDown));
-                }
-                */
-            }
-                break;
+            break;
             case COMPLETE: {
                 //Poll for input
                 restartButton.update(checkTouch, touchX, touchY);
@@ -405,7 +366,6 @@ public class GameScreen implements Screen {
 
     private void newGame(){
         gameState = GameState.PLAYING;
-
         dt = 0.0f;
 
         playerSprite.setCenter(playerSprite.getWidth()/2,playerSprite.getWidth()/2);

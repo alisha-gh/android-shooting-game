@@ -40,7 +40,6 @@ public class Button {
             int h2 = Gdx.graphics.getHeight();
             //Touch coordinates have origin in top-left instead of bottom left
 
-            //isDownPrev = isDown;
             if (touchX >= x && touchX <= x + w && h2 - touchY >= y && h2 - touchY <= y + h) {
                 isDown = true;
                 this.justPressed = false;
@@ -66,6 +65,5 @@ public class Button {
 
     public boolean justPressed() {
         return justPressed;
-        //return isDown && !isDownPrev;
     }
 }
