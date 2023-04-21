@@ -200,21 +200,17 @@ public class GameScreen implements Screen {
         }
 
         //TODO Collision Animation
-        Gdx.app.log("destroying textures ", String.valueOf(playerDestroyingTextures.length));
-        if (isDestroying && playerDestroyingIndex < playerDestroyingTextures.length){
-            Gdx.app.log("Is Destroying ", "Collision");
-            playerDestroyingFrame += 10 * dt;
-            if (playerMovingFrame >= playerMovingTextures.length){
-                playerMovingFrame = 0; //reset
+        if (isDestroying){
+            Gdx.app.log("destroying frame ", String.valueOf(playerMovingFrame));
+            playerDestroyingFrame += 5 * dt;
+            if (playerDestroyingFrame >= playerMovingTextures.length){
+                playerDestroyingFrame = 0; //reset
+                isDestroying = false;
             }
-            playerDestroyingIndex += 1;
             playerSprite.setTexture(playerDestroyingTextures[(int) playerDestroyingFrame]);
             playerSprite.setX(playerPosition.x);
             playerSprite.setY(playerPosition.y);
             playerSprite.draw(spriteBatch);
-        }
-        if(playerDestroyingIndex == playerDestroyingTextures.length-1){
-            playerDestroyingIndex = 0;
         }
 
         spriteBatch.end();
