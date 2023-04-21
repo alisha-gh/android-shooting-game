@@ -1,8 +1,6 @@
 package com.mygdx.game;
-import static java.lang.String.valueOf;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
@@ -10,11 +8,11 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.Vector;
 
 public class GameScreen implements Screen {
     private OrthographicCamera camera;
@@ -29,6 +27,8 @@ public class GameScreen implements Screen {
 
     //Player Character
     Texture playerTexture;
+    private Texture[] playerMovingTextures;
+    private float playerFrame = 0;
     Sprite playerSprite;
     Vector2 playerVector;
     Vector2 playerPosition;
@@ -65,7 +65,6 @@ public class GameScreen implements Screen {
     Button restartButton;
     Button attackButton;
     Button pauseButton;
-    boolean shootButtonWasPressed = false;
 
     //A list of Missiles
     ArrayList<Vector2> missiles = new ArrayList<Vector2>();
@@ -102,23 +101,26 @@ public class GameScreen implements Screen {
         camera.setToOrtho(false, viewportWidth, background.getHeight());
 
         //Textures
-        playerTexture = new Texture("Plane02/Moving/skeleton-MovingNIdle_0.png");
+        playerMovingTextures = new Texture[14];
+        for(int i = 0; i < 14; i++){
+            playerMovingTextures[i] = new Texture((Gdx.files.internal("Player/Moving/skeleton-MovingNIdle_" + i + ".png")));
+        }
         enemyTexture = new Texture("Enemy/Moving/skeleton-Moving_0.png");
-        buttonSquareTexture = new Texture("buttons/buttonSquare_blue.png");
-        buttonSquareDownTexture = new Texture("buttons/buttonSquare_beige_pressed.png");
-        buttonLongTexture = new Texture("buttons/buttonLong_blue.png");
-        buttonLongDownTexture = new Texture("buttons/buttonLong_beige_pressed.png");
-        missileTexture = new Texture("11.png");
-        buttonAttackTexture = new Texture("buttons/shoot_btn.png");
-        buttonAttackDownTexture = new Texture("buttons/shoot_btn_pressed.png");
-        buttonPauseTexture = new Texture("buttons/pause-Btn.png");
-        buttonPlayTexture = new Texture("buttons/play-Btn.png");
+        buttonSquareTexture = new Texture("Buttons/buttonSquare_blue.png");
+        buttonSquareDownTexture = new Texture("Buttons/buttonSquare_beige_pressed.png");
+        buttonLongTexture = new Texture("Buttons/buttonLong_blue.png");
+        buttonLongDownTexture = new Texture("Buttons/buttonLong_beige_pressed.png");
+        missileTexture = new Texture("missile.png");
+        buttonAttackTexture = new Texture("Buttons/shoot_btn.png");
+        buttonAttackDownTexture = new Texture("Buttons/shoot_btn_pressed.png");
+        buttonPauseTexture = new Texture("Buttons/pause-Btn.png");
+        buttonPlayTexture = new Texture("Buttons/play-Btn.png");
 
         //Player
-        playerSprite = new Sprite(playerTexture);
+        playerSprite = new Sprite(playerMovingTextures[0]);
         playerSprite.setSize(320, 320);
         playerVector = new Vector2();
-        playerPosition = new Vector2(100, screenHeight / 2 - playerSprite.getHeight() / 2);
+        playerPosition = new Vector2(100, screenHeight / 2 - playerSprite.getHeight() / 2); //set initial position
 
         //Enemy
         enemySprite = new Sprite(enemyTexture);
@@ -165,6 +167,13 @@ public class GameScreen implements Screen {
         spriteBatch.draw(background, backgroundX, 0);  //first background
         spriteBatch.draw(background, backgroundX+background.getWidth(), 0); //second background
 
+        //Player Animation
+        playerFrame += 10 * dt;
+        if (playerFrame >= playerMovingTextures.length){
+            playerFrame = 0; //reset
+        }
+        Gdx.app.log("GameScreen render: playerFrame ",String.valueOf(playerFrame));
+        playerSprite.setTexture(playerMovingTextures[(int) playerFrame]);
         playerSprite.setX(playerPosition.x);
         playerSprite.setY(playerPosition.y);
         playerSprite.draw(spriteBatch);
