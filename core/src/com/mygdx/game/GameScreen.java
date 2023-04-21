@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
 import java.util.ArrayList;
@@ -17,7 +16,7 @@ import java.util.Random;
 public class GameScreen implements Screen {
     private OrthographicCamera camera;
     private Texture background;
-    private MyGdxGame game;
+    private final MyGdxGame game;
     public enum GameState { PLAYING, COMPLETE, PAUSE }
     GameState gameState = GameState.PLAYING;
     boolean restartActive;
@@ -28,22 +27,27 @@ public class GameScreen implements Screen {
     //Player Character
     Texture playerTexture;
     private Texture[] playerMovingTextures;
-    private float playerFrame = 0;
+    private float playerMovingFrame = 0;
     Sprite playerSprite;
     Vector2 playerVector;
     Vector2 playerPosition;
 
 
     //Enemy Character
-    Texture enemyTexture;
-    Sprite enemySprite;
-    Vector2 enemyPosition;
+//    Texture enemyTexture;
+    private Texture[] enemyMovingTextures;
+    private float enemyMovingFrame = 0;
+    ArrayList<Sprite> enemySprites = new ArrayList<Sprite>();
+    ArrayList<Vector2> enemies = new ArrayList<Vector2>();
+    long lastEnemyCreatedTime = 0;
 
     //Missile
     Texture missileTexture;
     Sprite missileSprite;
     Vector2 missilePosition;
+    ArrayList<Vector2> missiles = new ArrayList<Vector2>();
 
+    //Batch
     SpriteBatch spriteBatch;
     SpriteBatch uiBatch; //Second SpriteBatch without camera transforms, for drawing UI
 
@@ -65,13 +69,6 @@ public class GameScreen implements Screen {
     Button restartButton;
     Button attackButton;
     Button pauseButton;
-
-    //A list of Missiles
-    ArrayList<Vector2> missiles = new ArrayList<Vector2>();
-    //A list of Enemies
-    ArrayList<Vector2> enemies = new ArrayList<Vector2>();
-
-    long lastEnemyCreatedTime = 0;
 
     float backgroundX = 0;
 
@@ -105,7 +102,11 @@ public class GameScreen implements Screen {
         for(int i = 0; i < 14; i++){
             playerMovingTextures[i] = new Texture((Gdx.files.internal("Player/Moving/skeleton-MovingNIdle_" + i + ".png")));
         }
-        enemyTexture = new Texture("Enemy/Moving/skeleton-Moving_0.png");
+        enemyMovingTextures = new Texture[17];
+        for(int i = 0; i < 17; i++){
+            enemyMovingTextures[i] = new Texture((Gdx.files.internal("Enemy/Moving/skeleton-Moving_" + i + ".png")));
+        }
+//        enemyTexture = new Texture("Enemy/Moving/skeleton-Moving_0.png");
         buttonSquareTexture = new Texture("Buttons/buttonSquare_blue.png");
         buttonSquareDownTexture = new Texture("Buttons/buttonSquare_beige_pressed.png");
         buttonLongTexture = new Texture("Buttons/buttonLong_blue.png");
@@ -123,10 +124,12 @@ public class GameScreen implements Screen {
         playerPosition = new Vector2(100, screenHeight / 2 - playerSprite.getHeight() / 2); //set initial position
 
         //Enemy
-        enemySprite = new Sprite(enemyTexture);
-        enemySprite.setSize(360, 360);
-        enemySprite.setCenter(enemySprite.getWidth()/2,enemySprite.getWidth()/2);
-        enemyPosition = new Vector2(viewportWidth - enemySprite.getWidth() * 2, screenHeight / 2 - playerSprite.getHeight() / 2);
+//        enemyPositions = new Vector2[enemies.size()];
+//        for(int i = 0; i < enemies.size(); i++){
+//            enemySprites[i] = new Sprite(enemyMovingTextures[0]);
+//            enemySprites[i].setSize(320, 320);
+//            enemyPositions[i] = new Vector2(enemies.get(i).x, screenHeight / 2 - enemySprites[i].getHeight() / 2); //set initial position
+//        }
 
         //Missile
         missileSprite = new Sprite(missileTexture);
@@ -168,20 +171,28 @@ public class GameScreen implements Screen {
         spriteBatch.draw(background, backgroundX+background.getWidth(), 0); //second background
 
         //Player Animation
-        playerFrame += 10 * dt;
-        if (playerFrame >= playerMovingTextures.length){
-            playerFrame = 0; //reset
+        playerMovingFrame += 10 * dt;
+        if (playerMovingFrame >= playerMovingTextures.length){
+            playerMovingFrame = 0; //reset
         }
-        Gdx.app.log("GameScreen render: playerFrame ",String.valueOf(playerFrame));
-        playerSprite.setTexture(playerMovingTextures[(int) playerFrame]);
+        playerSprite.setTexture(playerMovingTextures[(int) playerMovingFrame]);
         playerSprite.setX(playerPosition.x);
         playerSprite.setY(playerPosition.y);
         playerSprite.draw(spriteBatch);
 
+        //Enemy Animation
         for (int i=0; i < enemies.size(); i++) {
-            enemySprite.setX(enemies.get(i).x);
-            enemySprite.setY(enemies.get(i).y);
-            enemySprite.draw(spriteBatch);
+            enemyMovingFrame += 10 * dt;
+            if(enemyMovingFrame >= enemyMovingTextures.length){
+                enemyMovingFrame = 0; //reset
+            }
+
+            if (!enemies.isEmpty()){
+                enemySprites.get(i).setTexture(enemyMovingTextures[(int) enemyMovingFrame]);
+                enemySprites.get(i).setX(enemies.get(i).x);
+                enemySprites.get(i).setY(enemies.get(i).y);
+                enemySprites.get(i).draw(spriteBatch);
+            }
         }
 
         for (int i=0; i < this.missiles.size(); i++) {
@@ -287,7 +298,12 @@ public class GameScreen implements Screen {
                 int randomNum = random.nextInt(10);
                 if (System.currentTimeMillis() > lastEnemyCreatedTime + 2000) {
                     lastEnemyCreatedTime = System.currentTimeMillis();
-                    enemies.add(new Vector2(camera.viewportWidth + enemySprite.getWidth() * 2 * randomNum, camera.viewportHeight/randomNum));
+                    Vector2 newEnemy = new Vector2(camera.viewportWidth + 320 * 2 * randomNum, camera.viewportHeight/randomNum);
+                    enemies.add(newEnemy);
+                    Sprite newEnemySprite = new Sprite(enemyMovingTextures[0]);
+                    newEnemySprite.setSize(320,320);
+                    newEnemySprite.setPosition(newEnemy.x, newEnemy.y);
+                    enemySprites.add(newEnemySprite);
                 }
 
                 ArrayList<Vector2> enemiesToRemove = new ArrayList<Vector2>();
@@ -325,7 +341,7 @@ public class GameScreen implements Screen {
                 //Detect Enemies and Missiles Collisions
                 for(Vector2 missile : missiles){
                     for(Vector2 enemy : enemies){
-                        if (missile.dst(new Vector2(enemy.x + (enemyTexture.getWidth() / 2), enemy.y + (enemyTexture.getHeight() / 2))) < 200) {
+                        if (missile.dst(new Vector2(enemy.x + (320 / 2), enemy.y + (320 / 2))) < 200) {
                             //200 is the enemy's size
                             enemiesToRemove.add(enemy);
                             missilesToRemove.add(missile);
@@ -368,7 +384,7 @@ public class GameScreen implements Screen {
         buttonSquareDownTexture.dispose();
         buttonLongTexture.dispose();
         buttonLongDownTexture.dispose();
-        enemyTexture.dispose();
+//        enemyTexture.dispose();
         missileTexture.dispose();
         buttonPlayTexture.dispose();
     }
