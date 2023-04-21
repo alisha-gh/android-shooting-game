@@ -55,6 +55,7 @@ public class GameScreen implements Screen {
     Texture buttonAttackTexture;
     Texture buttonAttackDownTexture;
     Texture buttonPauseTexture;
+    Texture buttonPlayTexture;
 
     //UI Buttons
     Button moveLeftButton;
@@ -107,10 +108,11 @@ public class GameScreen implements Screen {
         buttonSquareDownTexture = new Texture("buttons/buttonSquare_beige_pressed.png");
         buttonLongTexture = new Texture("buttons/buttonLong_blue.png");
         buttonLongDownTexture = new Texture("buttons/buttonLong_beige_pressed.png");
-        missileTexture = new Texture("Missile.png");
+        missileTexture = new Texture("11.png");
         buttonAttackTexture = new Texture("buttons/Shoot_btn.png");
         buttonAttackDownTexture = new Texture("buttons/Bubble.png");
         buttonPauseTexture = new Texture("buttons/Pause-Btn.png");
+        buttonPlayTexture = new Texture("buttons/Play-Btn.png");
 
         //Player
         playerSprite = new Sprite(playerTexture);
@@ -152,9 +154,9 @@ public class GameScreen implements Screen {
         dt = Gdx.graphics.getDeltaTime();
         update();
 
-        switch(gameState) {
+        //switch(gameState) {
             //if gameState is Running: Draw Controls
-            case PLAYING: {
+            //case PLAYING: {
                 //Clear the screen every frame before drawing.
                 Gdx.gl.glClearColor(0, 0, 0, 1);
                 Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA); //Allows transparent sprites/tiles
@@ -185,12 +187,6 @@ public class GameScreen implements Screen {
                 }
 
                 spriteBatch.end();
-
-                backgroundX -= 800 * dt; //background movement speed
-                //Reposition the background when it goes out of scope
-                if(backgroundX < -background.getWidth()){
-                    backgroundX += background.getWidth();
-                }
                 //Draw UI
                 uiBatch.begin();
                 moveLeftButton.draw(uiBatch);
@@ -200,6 +196,8 @@ public class GameScreen implements Screen {
                 attackButton.draw(uiBatch);
                 pauseButton.draw(uiBatch);
                 uiBatch.end();
+
+                /*
             } break;
             //If gameState is Complete: Draw Restart button
             case COMPLETE: {
@@ -209,10 +207,15 @@ public class GameScreen implements Screen {
             } break;
             case PAUSE: {
                 update();
-                buttonPauseTexture = new Texture("buttons/Play-Btn.png"); //TODO draw resume button
                 Gdx.app.log("GameScreen render: ", "PAUSE");
 
             }
+                 */
+        //}
+        if (gameState == GameState.COMPLETE) {
+            uiBatch.begin();
+            restartButton.draw(uiBatch);
+            uiBatch.end();
         }
     }
 
@@ -229,6 +232,22 @@ public class GameScreen implements Screen {
         moveUpButton.update(checkTouch, touchX, touchY);
         attackButton.update(checkTouch, touchX, touchY);
         pauseButton.update(checkTouch, touchX, touchY);
+
+
+        if (pauseButton.justPressed()) {
+            //if (!pauseButton.isDownPrev) {
+                if (gameState == GameState.PAUSE) {
+                    gameState = GameState.PLAYING;
+                    pauseButton.setTexture(buttonPauseTexture);
+                    Gdx.app.log("Pause Button is Pressed to play", String.valueOf(pauseButton.isDown));
+                }
+                else {
+                    gameState = GameState.PAUSE;
+                    pauseButton.setTexture(buttonPlayTexture);
+                    Gdx.app.log("Pause Button is Pressed to pause", String.valueOf(pauseButton.isDown));
+                }
+            //}
+        }
 
         //Update Game State based on input
         switch (gameState) {
@@ -251,22 +270,20 @@ public class GameScreen implements Screen {
                     moveUpButton.isDown = true;
                     moveY += 1;
                 }
-                if (attackButton.isDown) {
-                    if (!attackButton.isDownPrev) {
-                        attackButton.isDown = true;
-                        Gdx.app.log("Attack Button is Pressed", String.valueOf(attackButton.isDown));
-                        attackButton.isDownPrev = true;
-                        this.missiles.add(new Vector2(playerPosition.x + playerSprite.getWidth(), playerPosition.y));
-                    }
+                if (attackButton.justPressed()) {
+                    attackButton.isDown = true;
+                    Gdx.app.log("Attack Button is Pressed", String.valueOf(attackButton.isDown));
+                    attackButton.isDownPrev = true;
+                    this.missiles.add(new Vector2(playerPosition.x + playerSprite.getWidth(), playerPosition.y));
                 }
                 else {
                     this.shootButtonWasPressed = false;
                 }
-                if (pauseButton.justPressed()) {
-                    gameState = GameState.PAUSE;
-                    pauseButton.isDown = false;
-                    pauseButton.isDownPrev = true;
-                    Gdx.app.log("Pause Button is Pressed", String.valueOf(pauseButton.isDown));
+
+                backgroundX -= 800 * dt; //background movement speed
+                //Reposition the background when it goes out of scope
+                if(backgroundX < -background.getWidth()){
+                    backgroundX += background.getWidth();
                 }
 
                 //Determine Character Movement Distance
@@ -316,7 +333,7 @@ public class GameScreen implements Screen {
 
                 for(Vector2 missile : missiles){
                     for(Vector2 enemy : enemies){
-                        if (missile.dst(enemy) < 200) {
+                        if (missile.dst(new Vector2(enemy.x + (enemyTexture.getWidth() / 2), enemy.y + (enemyTexture.getHeight() / 2))) < 200) {
                             //200 is the enemy's size
                             enemiesToRemove.add(enemy);
                             missilesToRemove.add(missile);
@@ -342,10 +359,17 @@ public class GameScreen implements Screen {
                 break;
             case PAUSE: {
                 Gdx.app.log("GameScreen update", "PAUSE");
-                if(pauseButton.justPressed()){
-                    gameState = GameState.PLAYING;
+                /*
+                if(pauseButton.isDown){
+                    if (!pauseButton.isDownPrev) {
+                        pauseButton.isDown = true;
+                        pauseButton.isDownPrev = true;
+                        gameState = GameState.PLAYING;
+                        Gdx.app.log("Pause Button is Pressed", String.valueOf(pauseButton.isDown));
+                    }
                     Gdx.app.log("Pause Button is Pressed again", String.valueOf(pauseButton.isDown));
                 }
+                */
             }
                 break;
             case COMPLETE: {
@@ -376,6 +400,7 @@ public class GameScreen implements Screen {
         buttonLongDownTexture.dispose();
         enemyTexture.dispose();
         missileTexture.dispose();
+        buttonPlayTexture.dispose();
     }
 
     private void newGame(){
