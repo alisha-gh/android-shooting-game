@@ -65,7 +65,6 @@ public class GameScreen implements Screen {
     Button attackButton;
     Button pauseButton;
     boolean shootButtonWasPressed = false;
-    boolean pauseButtonWasPressed = false;
 
     //A list of Missiles
     ArrayList<Vector2> missiles = new ArrayList<Vector2>();
@@ -122,6 +121,7 @@ public class GameScreen implements Screen {
         //Enemy
         enemySprite = new Sprite(enemyTexture);
         enemySprite.setSize(400, 400);
+        enemySprite.setCenter(enemySprite.getWidth()/2,enemySprite.getWidth()/2);
         enemyPosition = new Vector2(viewportWidth - enemySprite.getWidth() * 2, screenHeight / 2 - playerSprite.getHeight() / 2);
 
         //Missile
@@ -252,10 +252,10 @@ public class GameScreen implements Screen {
                     moveY += 1;
                 }
                 if (attackButton.isDown) {
-                    if (!this.shootButtonWasPressed) {
+                    if (!attackButton.isDownPrev) {
                         attackButton.isDown = true;
                         Gdx.app.log("Attack Button is Pressed", String.valueOf(attackButton.isDown));
-                        this.shootButtonWasPressed = true;
+                        attackButton.isDownPrev = true;
                         this.missiles.add(new Vector2(playerPosition.x + playerSprite.getWidth(), playerPosition.y));
                     }
                 }
@@ -305,14 +305,14 @@ public class GameScreen implements Screen {
                 }
 
                 //Detect Collisions
-                for(Vector2 enemy : enemies){
-                    Gdx.app.log("Player Vector ", String.valueOf(playerPosition));
-                    if (enemy.dst(playerPosition) < 500){
-                        Gdx.app.log("Player and Enemy ", "Collision");
-                        enemiesToRemove.add(enemy);
-                        gameState = GameState.COMPLETE;
-                    }
-                }
+//                for(Vector2 enemy : enemies){
+//                    Gdx.app.log("Player Vector ", String.valueOf(playerPosition));
+//                    if (enemy.dst(playerPosition) < 500){
+//                        Gdx.app.log("Player and Enemy ", "Collision");
+//                        enemiesToRemove.add(enemy);
+//                        gameState = GameState.COMPLETE;
+//                    }
+//                }
 
                 for(Vector2 missile : missiles){
                     for(Vector2 enemy : enemies){
@@ -338,21 +338,6 @@ public class GameScreen implements Screen {
                     playerPosition.y += playerVector.y;
                     playerSprite.translate(playerVector.x, playerVector.y);
                 }
-
-                //TODO Check if player has met the winning condition
-//                if (playerSprite.getBoundingRectangle().overlaps(goalSprite.getBoundingRectangle())) {
-//                    //Player has won!
-//                    gameState = GameState.COMPLETE;
-//                }
-
-                //TODO Calculate overhead layer opacity
-//                if (playerSprite.getBoundingRectangle().overlaps(opacityTrigger)) {
-//                    overheadOpacity -= dt * 5.0f;
-//                } else {
-//                    overheadOpacity += dt * 5.0f;
-//                }
-//                overheadOpacity = MathUtils.clamp(overheadOpacity, 0.0f, 1.0f);
-
             }
                 break;
             case PAUSE: {
@@ -367,7 +352,7 @@ public class GameScreen implements Screen {
                 //Poll for input
                 restartButton.update(checkTouch, touchX, touchY);
 
-                if (Gdx.input.isKeyPressed(Input.Keys.DPAD_CENTER) || restartButton.isDown) {
+                if (restartButton.isDown) {
                     restartButton.isDown = true;
                     restartActive = true;
                 } else if (restartActive) {
