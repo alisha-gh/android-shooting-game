@@ -106,7 +106,6 @@ public class GameScreen implements Screen {
         for(int i = 0; i < 17; i++){
             enemyMovingTextures[i] = new Texture((Gdx.files.internal("Enemy/Moving/skeleton-Moving_" + i + ".png")));
         }
-//        enemyTexture = new Texture("Enemy/Moving/skeleton-Moving_0.png");
         buttonSquareTexture = new Texture("Buttons/buttonSquare_blue.png");
         buttonSquareDownTexture = new Texture("Buttons/buttonSquare_beige_pressed.png");
         buttonLongTexture = new Texture("Buttons/buttonLong_blue.png");
@@ -122,14 +121,6 @@ public class GameScreen implements Screen {
         playerSprite.setSize(320, 320);
         playerVector = new Vector2();
         playerPosition = new Vector2(100, screenHeight / 2 - playerSprite.getHeight() / 2); //set initial position
-
-        //Enemy
-//        enemyPositions = new Vector2[enemies.size()];
-//        for(int i = 0; i < enemies.size(); i++){
-//            enemySprites[i] = new Sprite(enemyMovingTextures[0]);
-//            enemySprites[i].setSize(320, 320);
-//            enemyPositions[i] = new Vector2(enemies.get(i).x, screenHeight / 2 - enemySprites[i].getHeight() / 2); //set initial position
-//        }
 
         //Missile
         missileSprite = new Sprite(missileTexture);
@@ -296,10 +287,11 @@ public class GameScreen implements Screen {
 
                 //Generate Enemies every second
                 Random random = new Random();
-                int randomNum = random.nextInt(10);
+                int randomNum = random.nextInt(200);
+                int randomY = random.nextInt((int)camera.viewportHeight-150);
                 if (System.currentTimeMillis() > lastEnemyCreatedTime + 2000) {
                     lastEnemyCreatedTime = System.currentTimeMillis();
-                    Vector2 newEnemy = new Vector2(camera.viewportWidth + 320 * 2 * randomNum, camera.viewportHeight/randomNum);
+                    Vector2 newEnemy = new Vector2(camera.viewportWidth + randomNum, randomY);
                     enemies.add(newEnemy);
                     Sprite newEnemySprite = new Sprite(enemyMovingTextures[0]);
                     newEnemySprite.setSize(320,320);
