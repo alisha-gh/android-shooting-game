@@ -28,13 +28,15 @@ public class GameScreen implements Screen {
     Texture playerTexture;
     private Texture[] playerMovingTextures;
     private float playerMovingFrame = 0;
+    private Texture[] playerDestroyingTextures;
+    private float playerDestroyingFrame = 0;
     Sprite playerSprite;
     Vector2 playerVector;
     Vector2 playerPosition;
-
+    int playerDestroyingIndex = 0;
+    boolean isDestroying = false;
 
     //Enemy Character
-//    Texture enemyTexture;
     private Texture[] enemyMovingTextures;
     private float enemyMovingFrame = 0;
     ArrayList<Sprite> enemySprites = new ArrayList<Sprite>();
@@ -102,8 +104,12 @@ public class GameScreen implements Screen {
         for(int i = 0; i < 14; i++){
             playerMovingTextures[i] = new Texture((Gdx.files.internal("Player/Moving/skeleton-MovingNIdle_" + i + ".png")));
         }
-        enemyMovingTextures = new Texture[17];
-        for(int i = 0; i < 17; i++){
+        playerDestroyingTextures = new Texture[22];
+        for(int i = 0; i < 22; i++){
+            playerDestroyingTextures[i] = new Texture((Gdx.files.internal("Player/Destroyed/skeleton-Destroy_" + i + ".png")));
+        }
+        enemyMovingTextures = new Texture[18];
+        for(int i = 0; i < 18; i++){
             enemyMovingTextures[i] = new Texture((Gdx.files.internal("Enemy/Moving/skeleton-Moving_" + i + ".png")));
         }
         buttonSquareTexture = new Texture("Buttons/buttonSquare_blue.png");
@@ -175,11 +181,10 @@ public class GameScreen implements Screen {
         //Enemy Animation
         for (int i=0; i < enemies.size(); i++) {
             enemyMovingFrame += 10 * dt;
-            if(enemyMovingFrame >= enemyMovingTextures.length){
+            if (enemyMovingFrame >= enemyMovingTextures.length) {
                 enemyMovingFrame = 0; //reset
             }
-
-            if (!enemies.isEmpty()){
+            if (!enemies.isEmpty()) {
                 enemySprites.get(i).setTexture(enemyMovingTextures[(int) enemyMovingFrame]);
                 enemySprites.get(i).setX(enemies.get(i).x);
                 enemySprites.get(i).setY(enemies.get(i).y);
@@ -187,11 +192,31 @@ public class GameScreen implements Screen {
             }
         }
 
+        //Draw Missiles
         for (int i=0; i < this.missiles.size(); i++) {
             missileSprite.setX(missiles.get(i).x);
             missileSprite.setY(missiles.get(i).y);
             missileSprite.draw(spriteBatch);
         }
+
+        //TODO Collision Animation
+        Gdx.app.log("destroying textures ", String.valueOf(playerDestroyingTextures.length));
+        if (isDestroying && playerDestroyingIndex < playerDestroyingTextures.length){
+            Gdx.app.log("Is Destroying ", "Collision");
+            playerDestroyingFrame += 10 * dt;
+            if (playerMovingFrame >= playerMovingTextures.length){
+                playerMovingFrame = 0; //reset
+            }
+            playerDestroyingIndex += 1;
+            playerSprite.setTexture(playerDestroyingTextures[(int) playerDestroyingFrame]);
+            playerSprite.setX(playerPosition.x);
+            playerSprite.setY(playerPosition.y);
+            playerSprite.draw(spriteBatch);
+        }
+        if(playerDestroyingIndex == playerDestroyingTextures.length-1){
+            playerDestroyingIndex = 0;
+        }
+
         spriteBatch.end();
 
         //Draw UI
@@ -323,14 +348,15 @@ public class GameScreen implements Screen {
                 }
 
                 //Detect Player and Enemies Collisions
-//                for(Vector2 enemy : enemies){
-//                    Gdx.app.log("Player Vector ", String.valueOf(playerPosition));
-//                    if (enemy.dst(playerPosition) < 500){
-//                        Gdx.app.log("Player and Enemy ", "Collision");
-//                        enemiesToRemove.add(enemy);
-//                        gameState = GameState.COMPLETE;
-//                    }
-//                }
+                for(Vector2 enemy : enemies){
+                    if (enemy.dst(playerPosition) < 200){
+                        Gdx.app.log("Player and Enemy ", "Collision");
+                        enemiesToRemove.add(enemy);
+                        isDestroying = true;
+                        gameState = GameState.COMPLETE;
+                    }
+                }
+
                 //Detect Enemies and Missiles Collisions
                 for(Vector2 missile : missiles){
                     for(Vector2 enemy : enemies){
@@ -354,7 +380,6 @@ public class GameScreen implements Screen {
             case COMPLETE: {
                 //Poll for input
                 restartButton.update(checkTouch, touchX, touchY);
-
                 if (restartButton.isDown) {
                     restartButton.isDown = true;
                     restartActive = true;
@@ -373,12 +398,23 @@ public class GameScreen implements Screen {
             background.dispose();
         }
         playerTexture.dispose();
+        for (Texture playerMovingTexture : playerMovingTextures){
+            playerMovingTexture.dispose();
+        }
+        for (Texture playerDestroyingTexture : playerDestroyingTextures){
+            playerDestroyingTexture.dispose();
+        }
+        for (Texture enemyMovingTexture : enemyMovingTextures){
+            enemyMovingTexture.dispose();
+        }
         buttonSquareTexture.dispose();
         buttonSquareDownTexture.dispose();
         buttonLongTexture.dispose();
         buttonLongDownTexture.dispose();
-//        enemyTexture.dispose();
+        buttonAttackTexture.dispose();
+        buttonAttackDownTexture.dispose();
         missileTexture.dispose();
+        buttonPauseTexture.dispose();
         buttonPlayTexture.dispose();
     }
 
