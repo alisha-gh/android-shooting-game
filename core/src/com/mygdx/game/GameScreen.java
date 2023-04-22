@@ -274,10 +274,12 @@ public class GameScreen implements Screen {
             if (isMuted) { //is not playing music, pressed to unmute
                 isMuted = false;
                 musicButton.setTexture(buttonUnmuteTexture);
+                backgroundMusic.play();
             }
             else { //is playing music, pressed to mute
                 isMuted = true;
                 musicButton.setTexture(buttonMuteTexture);
+                backgroundMusic.pause();
             }
         }
 
