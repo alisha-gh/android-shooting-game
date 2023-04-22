@@ -90,6 +90,8 @@ public class GameScreen implements Screen {
     //Scoring
     private int score = 0;
     private BitmapFont scoreFont;
+    private Texture victoryTexture;
+    private Sprite victorySprite;
 
     // constructor to keep a reference to the main Game class
     public GameScreen(MyGdxGame game) {
@@ -135,6 +137,7 @@ public class GameScreen implements Screen {
         buttonResumeTexture = new Texture("Buttons/resume_btn.png");
         buttonMuteTexture = new Texture("Buttons/mute_btn.png");
         buttonUnmuteTexture = new Texture("Buttons/unmute_btn.png");
+        victoryTexture = new Texture("victory.png");
 
         //Player
         playerSprite = new Sprite(playerMovingTextures[0]);
@@ -174,6 +177,10 @@ public class GameScreen implements Screen {
         timerFont = new BitmapFont();
         timerFont.setColor(Color.WHITE);
         timerFont.getData().setScale(6f);
+
+        //Victory Sprite
+        victorySprite = new Sprite(victoryTexture);
+        victorySprite.setSize(screenWidth*0.7f, victorySprite.getWidth() * victorySprite.getHeight() / victorySprite.getWidth());
 
         newGame();
     }
@@ -246,6 +253,11 @@ public class GameScreen implements Screen {
         int seconds = (int)timer % 60;
         String timeStr = String.format("%02d:%02d", minutes, seconds);
         timerFont.draw(spriteBatch, timeStr, screenWidth*0.5f-20.0f, topUIPaddingY+20.0f);
+        //Show Victory
+        victorySprite.setX((screenWidth-victorySprite.getWidth())/2);
+        victorySprite.setY((screenHeight-victorySprite.getHeight())/2);
+        victorySprite.draw(spriteBatch);
+
         spriteBatch.end();
 
         //Draw UI
