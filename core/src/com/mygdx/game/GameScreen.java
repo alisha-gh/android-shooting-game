@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
@@ -92,6 +93,7 @@ public class GameScreen implements Screen {
     private BitmapFont scoreFont;
     private Texture victoryTexture;
     private Sprite victorySprite;
+    private boolean win = false;
 
     // constructor to keep a reference to the main Game class
     public GameScreen(MyGdxGame game) {
@@ -189,6 +191,7 @@ public class GameScreen implements Screen {
     public void render(float delta) {
         dt = Gdx.graphics.getDeltaTime();
         update();
+        checkWin();
 
         //Clear the screen every frame before drawing.
         Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -252,11 +255,17 @@ public class GameScreen implements Screen {
         int minutes = (int)timer / 60;
         int seconds = (int)timer % 60;
         String timeStr = String.format("%02d:%02d", minutes, seconds);
-        timerFont.draw(spriteBatch, timeStr, screenWidth*0.5f-20.0f, topUIPaddingY+20.0f);
+        GlyphLayout layout = new GlyphLayout();
+        layout.setText(timerFont, timeStr);
+        float textWidth = layout.width;
+        timerFont.draw(spriteBatch, timeStr, (screenWidth-textWidth)/2, topUIPaddingY+20.0f);
         //Show Victory
-        victorySprite.setX((screenWidth-victorySprite.getWidth())/2);
-        victorySprite.setY((screenHeight-victorySprite.getHeight())/2);
-        victorySprite.draw(spriteBatch);
+        if(win){
+            victorySprite.setX((screenWidth-victorySprite.getWidth())/2);
+            victorySprite.setY((screenHeight-victorySprite.getHeight())/2);
+            victorySprite.draw(spriteBatch);
+            restartButton.y = screenHeight/2 - 400;
+        }
 
         spriteBatch.end();
 
@@ -450,6 +459,13 @@ public class GameScreen implements Screen {
         }
     }
 
+    private void checkWin() {
+        if(score > 50 || timer > 300){
+            win = true;
+            gameState = GameState.COMPLETE;
+        }
+    }
+
     @Override
     public void dispose() {
         spriteBatch.dispose();
@@ -490,6 +506,7 @@ public class GameScreen implements Screen {
         missiles.clear();
         score = 0;
         timer = 0;
+        win = false;
         gameState = GameState.PLAYING;
         restartActive = false;
     }
