@@ -17,6 +17,7 @@ public class GameScreen implements Screen {
     private final MyGdxGame game;
     private OrthographicCamera camera;
     private Texture background;
+    float backgroundX = 0;
 
     float screenWidth = Gdx.graphics.getWidth();
     float screenHeight = Gdx.graphics.getHeight();
@@ -64,6 +65,8 @@ public class GameScreen implements Screen {
     Texture buttonAttackDownTexture;
     Texture buttonPauseTexture;
     Texture buttonResumeTexture;
+    Texture buttonMuteTexture;
+    Texture buttonUnmuteTexture;
 
     //UI Buttons
     Button moveLeftButton;
@@ -73,10 +76,11 @@ public class GameScreen implements Screen {
     Button restartButton;
     Button attackButton;
     Button pauseButton;
+    Button musicButton;
 
-    float backgroundX = 0;
-
+    //Misic
     private Music backgroundMusic;
+    private boolean isMuted = false;
 
     // constructor to keep a reference to the main Game class
     public GameScreen(MyGdxGame game) {
@@ -120,6 +124,8 @@ public class GameScreen implements Screen {
         buttonAttackDownTexture = new Texture("Buttons/shoot_btn_pressed.png");
         buttonPauseTexture = new Texture("Buttons/pause_btn.png");
         buttonResumeTexture = new Texture("Buttons/resume_btn.png");
+        buttonMuteTexture = new Texture("Buttons/mute_btn.png");
+        buttonUnmuteTexture = new Texture("Buttons/unmute_btn.png");
 
         //Player
         playerSprite = new Sprite(playerMovingTextures[0]);
@@ -140,6 +146,7 @@ public class GameScreen implements Screen {
         moveUpButton = new Button(buttonSize, buttonSize*2, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
         attackButton = new Button(screenWidth - 500, 200, buttonSize*2, buttonSize*2, buttonAttackTexture, buttonAttackDownTexture);
         pauseButton = new Button(screenWidth - buttonSize*2, screenHeight - buttonSize*2, buttonSize, buttonSize, buttonPauseTexture, buttonPauseTexture);
+        musicButton = new Button(screenWidth - buttonSize*4, screenHeight - buttonSize*2, buttonSize, buttonSize, buttonUnmuteTexture, buttonMuteTexture);
         restartButton = new Button(screenWidth/2 - buttonSize*2, screenHeight/2 - buttonSize, buttonSize*4, buttonSize*2, buttonRestartTexture, buttonRestartDownTexture);
 
         //Background Music
@@ -223,6 +230,7 @@ public class GameScreen implements Screen {
         moveUpButton.draw(uiBatch);
         attackButton.draw(uiBatch);
         pauseButton.draw(uiBatch);
+        musicButton.draw(uiBatch);
         uiBatch.end();
         //Complete
         if (gameState == GameState.COMPLETE || gameState == GameState.PAUSE) {
@@ -245,6 +253,7 @@ public class GameScreen implements Screen {
         moveUpButton.update(checkTouch, touchX, touchY);
         attackButton.update(checkTouch, touchX, touchY);
         pauseButton.update(checkTouch, touchX, touchY);
+        musicButton.update(checkTouch, touchX, touchY);
 
         //Pause and Resume Button
         if (pauseButton.justPressed()) {
@@ -257,6 +266,18 @@ public class GameScreen implements Screen {
                 gameState = GameState.PAUSE;
                 pauseButton.setTexture(buttonResumeTexture);
                 Gdx.app.log("Pause Button is Pressed to pause", String.valueOf(pauseButton.isDown));
+            }
+        }
+
+        //Mute and Unmute Button
+        if (musicButton.justPressed()) {
+            if (isMuted) { //is not playing music, pressed to unmute
+                isMuted = false;
+                musicButton.setTexture(buttonUnmuteTexture);
+            }
+            else { //is playing music, pressed to mute
+                isMuted = true;
+                musicButton.setTexture(buttonMuteTexture);
             }
         }
 
