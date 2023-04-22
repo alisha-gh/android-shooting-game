@@ -14,6 +14,7 @@ public class MenuScreen implements Screen {
     private SpriteBatch batch;
     private Skin skin;
     private Stage stage;
+    private boolean isActive;
     public MenuScreen(MyGdxGame game){this.game = game;}
     public void create() {
             //---creates the components---
@@ -42,6 +43,8 @@ public class MenuScreen implements Screen {
     public void show() {
         Gdx.app.log("MenuScreen", "menuScreen show called");
         create();
+        Gdx.input.setInputProcessor(stage);
+        isActive = true;
     }
 
     @Override
@@ -50,8 +53,10 @@ public class MenuScreen implements Screen {
         Gdx.gl.glClearColor(0, 0, 0, 1); // Set the clear color (background color)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); // Clear the screen
 
-        stage.act(); // Update the Stage
-        stage.draw(); // Draw the Stage
+        if( isActive){
+            stage.act();
+            stage.draw();
+        }
     }
 
     @Override
@@ -72,6 +77,8 @@ public class MenuScreen implements Screen {
     @Override
     public void hide() {
         Gdx.app.log("MenuScreen: ","menuScreen hide called");
+        Gdx.input.setInputProcessor(null);
+        isActive = false;
     }
 
     @Override
