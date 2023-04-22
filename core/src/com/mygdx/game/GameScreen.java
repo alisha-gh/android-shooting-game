@@ -54,8 +54,8 @@ public class GameScreen implements Screen {
     //UI textures
     Texture buttonSquareTexture;
     Texture buttonSquareDownTexture;
-    Texture buttonLongTexture;
-    Texture buttonLongDownTexture;
+    Texture buttonRestartTexture;
+    Texture buttonRestartDownTexture;
     Texture buttonAttackTexture;
     Texture buttonAttackDownTexture;
     Texture buttonPauseTexture;
@@ -112,8 +112,8 @@ public class GameScreen implements Screen {
         }
         buttonSquareTexture = new Texture("Buttons/buttonSquare_blue.png");
         buttonSquareDownTexture = new Texture("Buttons/buttonSquare_beige_pressed.png");
-        buttonLongTexture = new Texture("Buttons/buttonLong_blue.png");
-        buttonLongDownTexture = new Texture("Buttons/buttonLong_beige_pressed.png");
+        buttonRestartTexture = new Texture("Buttons/play_purple.png");
+        buttonRestartDownTexture = new Texture("Buttons/play_pressed_purple.png");
         missileTexture = new Texture("missile.png");
         buttonAttackTexture = new Texture("Buttons/shoot_btn.png");
         buttonAttackDownTexture = new Texture("Buttons/shoot_btn_pressed.png");
@@ -139,7 +139,7 @@ public class GameScreen implements Screen {
         moveUpButton = new Button(buttonSize, buttonSize*2, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
         attackButton = new Button(screenWidth - 500, 200, buttonSize*2, buttonSize*2, buttonAttackTexture, buttonAttackDownTexture);
         pauseButton = new Button(screenWidth - buttonSize*2, screenHeight - buttonSize*2, buttonSize, buttonSize, buttonPauseTexture, buttonPauseTexture);
-        restartButton = new Button(screenWidth/2 - buttonSize*2, screenHeight * 0.2f, buttonSize*4, buttonSize, buttonLongTexture, buttonLongDownTexture);
+        restartButton = new Button(screenWidth/2 - buttonSize*2, screenHeight/2 - buttonSize, buttonSize*4, buttonSize*2, buttonRestartTexture, buttonRestartDownTexture);
 
         //Background Music
 //        backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("Music/neon-gaming-128925.mp3"));
@@ -403,8 +403,8 @@ public class GameScreen implements Screen {
         }
         buttonSquareTexture.dispose();
         buttonSquareDownTexture.dispose();
-        buttonLongTexture.dispose();
-        buttonLongDownTexture.dispose();
+        buttonRestartTexture.dispose();
+        buttonRestartDownTexture.dispose();
         buttonAttackTexture.dispose();
         buttonAttackDownTexture.dispose();
         missileTexture.dispose();
