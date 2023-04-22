@@ -255,7 +255,9 @@ public class GameScreen implements Screen {
         moveDownButton.draw(uiBatch);
         moveUpButton.draw(uiBatch);
         attackButton.draw(uiBatch);
-        pauseButton.draw(uiBatch);
+        if (gameState != GameState.COMPLETE){
+            pauseButton.draw(uiBatch);
+        }
         musicButton.draw(uiBatch);
         uiBatch.end();
         //Complete
@@ -283,15 +285,12 @@ public class GameScreen implements Screen {
 
         //Pause and Resume Button
         if (pauseButton.justPressed()) {
-            if (gameState == GameState.PAUSE) {
+            if (gameState == GameState.PAUSE) { //Resume
                 gameState = GameState.PLAYING;
                 pauseButton.setTexture(buttonPauseTexture);
-                Gdx.app.log("Pause Button is Pressed to play", String.valueOf(pauseButton.isDown));
-            }
-            else {
+            } else if (gameState == GameState.PLAYING){ //Pause
                 gameState = GameState.PAUSE;
                 pauseButton.setTexture(buttonResumeTexture);
-                Gdx.app.log("Pause Button is Pressed to pause", String.valueOf(pauseButton.isDown));
             }
         }
 
