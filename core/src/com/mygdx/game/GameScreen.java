@@ -25,7 +25,6 @@ public class GameScreen implements Screen {
     float dt; //Game clock
 
     //Player Character
-    Texture playerTexture;
     private Texture[] playerMovingTextures;
     private float playerMovingFrame = 0;
     private Texture[] playerDestroyingTextures;
@@ -33,7 +32,6 @@ public class GameScreen implements Screen {
     Sprite playerSprite;
     Vector2 playerVector;
     Vector2 playerPosition;
-    int playerDestroyingIndex = 0;
     boolean isDestroying = false;
 
     //Enemy Character
@@ -173,10 +171,12 @@ public class GameScreen implements Screen {
         if (playerMovingFrame >= playerMovingTextures.length){
             playerMovingFrame = 0; //reset
         }
-        playerSprite.setTexture(playerMovingTextures[(int) playerMovingFrame]);
-        playerSprite.setX(playerPosition.x);
-        playerSprite.setY(playerPosition.y);
-        playerSprite.draw(spriteBatch);
+        if(!isDestroying && gameState != GameState.COMPLETE){
+            playerSprite.setTexture(playerMovingTextures[(int) playerMovingFrame]);
+            playerSprite.setX(playerPosition.x);
+            playerSprite.setY(playerPosition.y);
+            playerSprite.draw(spriteBatch);
+        }
 
         //Enemy Animation
         for (int i=0; i < enemies.size(); i++) {
@@ -199,11 +199,10 @@ public class GameScreen implements Screen {
             missileSprite.draw(spriteBatch);
         }
 
-        //TODO Collision Animation
+        //Player and Enemy Collision
         if (isDestroying){
-            Gdx.app.log("destroying frame ", String.valueOf(playerMovingFrame));
-            playerDestroyingFrame += 5 * dt;
-            if (playerDestroyingFrame >= playerMovingTextures.length){
+            playerDestroyingFrame += 10 * dt;
+            if (playerDestroyingFrame >= playerDestroyingTextures.length){
                 playerDestroyingFrame = 0; //reset
                 isDestroying = false;
             }
@@ -345,7 +344,7 @@ public class GameScreen implements Screen {
 
                 //Detect Player and Enemies Collisions
                 for(Vector2 enemy : enemies){
-                    if (enemy.dst(playerPosition) < 200){
+                    if (enemy.dst(playerPosition) < 200){  //Collide
                         Gdx.app.log("Player and Enemy ", "Collision");
                         enemiesToRemove.add(enemy);
                         isDestroying = true;
@@ -393,7 +392,6 @@ public class GameScreen implements Screen {
         if (background != null) {
             background.dispose();
         }
-        playerTexture.dispose();
         for (Texture playerMovingTexture : playerMovingTextures){
             playerMovingTexture.dispose();
         }
