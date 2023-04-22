@@ -114,7 +114,7 @@ public class GameScreen implements Screen {
 
         //Camera and Background
         camera = new OrthographicCamera();
-        backgroundTexture = new Texture(Gdx.files.internal("Backgrounds/07/Repeated.png"));
+        backgroundTexture = new Texture(Gdx.files.internal("Backgrounds/03/Repeated.png"));
         float viewportWidth = backgroundTexture.getHeight() * screenRatio;
         camera.setToOrtho(false, viewportWidth, backgroundTexture.getHeight());
 
@@ -195,7 +195,7 @@ public class GameScreen implements Screen {
         dt = Gdx.graphics.getDeltaTime();
         update();
         checkWin();
-        updateLevel();
+        //updateLevel();
 
         //Clear the screen every frame before drawing.
         Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -206,7 +206,7 @@ public class GameScreen implements Screen {
         spriteBatch.setProjectionMatrix(camera.combined);
         spriteBatch.begin();
         spriteBatch.draw(backgroundTexture, backgroundX, 0);  //first background
-        spriteBatch.draw(backgroundTexture, backgroundX+ backgroundTexture.getWidth(), 0); //second background
+        spriteBatch.draw(backgroundTexture, backgroundX+ backgroundTexture.getWidth()-10, 0); //second background
 
         //Player Animation
         playerMovingFrame += 10 * dt;
@@ -462,19 +462,19 @@ public class GameScreen implements Screen {
     }
 
     private void checkWin() {
-        if(score > 50 || timer > 300){
+        if(score > 50 || timer > 180){
             win = true;
             gameState = GameState.COMPLETE;
         }
     }
 
     private void updateLevel(){
-        if(timer > 120){
+        if(timer > 3){
             level = 2;
             backgroundMusicLevel1.stop();
             backgroundMusicLevel2.setLooping(true);
             backgroundMusicLevel2.play();
-            backgroundTexture = new Texture(Gdx.files.internal("Backgrounds/02/Repeated.png"));
+            backgroundTexture = new Texture(Gdx.files.internal("Backgrounds/03/Repeated.png"));
         }
     }
 
@@ -521,7 +521,7 @@ public class GameScreen implements Screen {
         win = false;
         level = 1;
         gameState = GameState.PLAYING;
-        backgroundTexture = new Texture(Gdx.files.internal("Backgrounds/07/Repeated.png"));
+        backgroundTexture = new Texture(Gdx.files.internal("Backgrounds/02/Repeated.png"));
         backgroundMusicLevel2.stop();
         backgroundMusicLevel1.setLooping(true);
         backgroundMusicLevel1.play();
