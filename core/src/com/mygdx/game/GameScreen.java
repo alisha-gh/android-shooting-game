@@ -3,9 +3,11 @@ package com.mygdx.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
@@ -18,10 +20,11 @@ public class GameScreen implements Screen {
     private OrthographicCamera camera;
     private Texture background;
     float backgroundX = 0;
-
     float screenWidth = Gdx.graphics.getWidth();
     float screenHeight = Gdx.graphics.getHeight();
     float screenRatio = screenWidth / screenHeight; // Calculate the screen ratio
+    private float topUIPaddingY = screenHeight * 0.85f;
+
     public enum GameState { PLAYING, COMPLETE, PAUSE }
     GameState gameState = GameState.PLAYING;
     boolean restartActive;
@@ -81,6 +84,10 @@ public class GameScreen implements Screen {
     //Misic
     private Music backgroundMusic;
     private boolean isMuted = false;
+
+    //Scoring
+    private int score = 0;
+    private BitmapFont scoreFont;
 
     // constructor to keep a reference to the main Game class
     public GameScreen(MyGdxGame game) {
@@ -146,15 +153,20 @@ public class GameScreen implements Screen {
         moveDownButton = new Button(buttonSize+space, space, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
         moveUpButton = new Button(buttonSize+space, buttonSize*2+space, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
         attackButton = new Button(screenWidth - 500, 200, buttonSize*2, buttonSize*2, buttonAttackTexture, buttonAttackDownTexture);
-        pauseButton = new Button(screenWidth - buttonSize*2, screenHeight - buttonSize*2, buttonSize, buttonSize, buttonPauseTexture, buttonPauseTexture);
-        musicButton = new Button(screenWidth - buttonSize*4, screenHeight - buttonSize*2, buttonSize, buttonSize, buttonUnmuteTexture, buttonMuteTexture);
         restartButton = new Button(screenWidth/2 - buttonSize*2, screenHeight/2 - buttonSize, buttonSize*4, buttonSize*2, buttonRestartTexture, buttonRestartDownTexture);
+        pauseButton = new Button(screenWidth - buttonSize*2, topUIPaddingY, buttonSize, buttonSize, buttonPauseTexture, buttonPauseTexture);
+        musicButton = new Button(screenWidth - buttonSize*4, topUIPaddingY, buttonSize, buttonSize, buttonUnmuteTexture, buttonMuteTexture);
 
         //Background Music
 //        backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("Music/neon-gaming-128925.mp3"));
         backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("Music/pixelated-adventure-122039.mp3"));
         backgroundMusic.setLooping(true);
         backgroundMusic.play();
+
+        //Create font
+        scoreFont = new BitmapFont();
+        scoreFont.setColor(Color.WHITE);
+        scoreFont.getData().setScale(6f);
 
         newGame();
     }
@@ -221,6 +233,8 @@ public class GameScreen implements Screen {
             playerSprite.draw(spriteBatch);
         }
 
+        //Show score
+        scoreFont.draw(spriteBatch, "Score " + score, screenWidth*0.05f, topUIPaddingY+3.0f);
         spriteBatch.end();
 
         //Draw UI
@@ -384,9 +398,12 @@ public class GameScreen implements Screen {
                             //200 is the enemy's size
                             enemiesToRemove.add(enemy);
                             missilesToRemove.add(missile);
+                            score += 1;
                         }
                     }
                 }
+                Gdx.app.log("Player score ", String.valueOf(score));
+
 
                 //Remove
                 for (Vector2 missile : missilesToRemove) {
@@ -435,6 +452,11 @@ public class GameScreen implements Screen {
         missileTexture.dispose();
         buttonPauseTexture.dispose();
         buttonResumeTexture.dispose();
+        buttonMuteTexture.dispose();
+        buttonUnmuteTexture.dispose();
+        scoreFont.dispose();
+        spriteBatch.dispose();
+        uiBatch.dispose();
     }
 
     private void newGame(){
@@ -444,6 +466,7 @@ public class GameScreen implements Screen {
         playerPosition = new Vector2(100, screenHeight / 2 - playerSprite.getHeight() / 2); //set initial position
         enemies.clear();
         missiles.clear();
+        score = 0;
         gameState = GameState.PLAYING;
         restartActive = false;
     }
