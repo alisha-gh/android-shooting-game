@@ -59,7 +59,7 @@ public class GameScreen implements Screen {
     Texture buttonAttackTexture;
     Texture buttonAttackDownTexture;
     Texture buttonPauseTexture;
-    Texture buttonPlayTexture;
+    Texture buttonResumeTexture;
 
     //UI Buttons
     Button moveLeftButton;
@@ -118,7 +118,7 @@ public class GameScreen implements Screen {
         buttonAttackTexture = new Texture("Buttons/shoot_btn.png");
         buttonAttackDownTexture = new Texture("Buttons/shoot_btn_pressed.png");
         buttonPauseTexture = new Texture("Buttons/pause_btn.png");
-        buttonPlayTexture = new Texture("Buttons/play_btn.png");
+        buttonResumeTexture = new Texture("Buttons/resume_btn.png");
 
         //Player
         playerSprite = new Sprite(playerMovingTextures[0]);
@@ -224,7 +224,7 @@ public class GameScreen implements Screen {
         pauseButton.draw(uiBatch);
         uiBatch.end();
         //Complete
-        if (gameState == GameState.COMPLETE) {
+        if (gameState == GameState.COMPLETE || gameState == GameState.PAUSE) {
             uiBatch.begin();
             restartButton.draw(uiBatch);
             uiBatch.end();
@@ -254,7 +254,7 @@ public class GameScreen implements Screen {
             }
             else {
                 gameState = GameState.PAUSE;
-                pauseButton.setTexture(buttonPlayTexture);
+                pauseButton.setTexture(buttonResumeTexture);
                 Gdx.app.log("Pause Button is Pressed to pause", String.valueOf(pauseButton.isDown));
             }
         }
@@ -372,7 +372,7 @@ public class GameScreen implements Screen {
                 }
             }
             break;
-            case COMPLETE: {
+            case COMPLETE: {} case PAUSE: {
                 //Poll for input
                 restartButton.update(checkTouch, touchX, touchY);
                 if (restartButton.isDown) {
@@ -380,9 +380,10 @@ public class GameScreen implements Screen {
                     restartActive = true;
                 } else if (restartActive) {
                     newGame();
+                    restartActive = false;
                 }
             }
-                break;
+            break;
         }
     }
 
@@ -409,13 +410,13 @@ public class GameScreen implements Screen {
         buttonAttackDownTexture.dispose();
         missileTexture.dispose();
         buttonPauseTexture.dispose();
-        buttonPlayTexture.dispose();
+        buttonResumeTexture.dispose();
     }
 
     private void newGame(){
+        Gdx.app.log("new","game");
         gameState = GameState.PLAYING;
         dt = 0.0f;
-
         playerSprite.setCenter(playerSprite.getWidth()/2,playerSprite.getWidth()/2);
         restartActive = false;
     }
