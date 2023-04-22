@@ -140,10 +140,11 @@ public class GameScreen implements Screen {
 
         //Buttons
         float buttonSize = screenHeight * 0.1f;
-        moveLeftButton = new Button(0.0f, buttonSize, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
-        moveRightButton = new Button(buttonSize*2, buttonSize, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
-        moveDownButton = new Button(buttonSize, 0.0f, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
-        moveUpButton = new Button(buttonSize, buttonSize*2, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
+        float space = 50.0f;
+        moveLeftButton = new Button(space, buttonSize+space, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
+        moveRightButton = new Button(buttonSize*2+space, buttonSize+space, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
+        moveDownButton = new Button(buttonSize+space, space, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
+        moveUpButton = new Button(buttonSize+space, buttonSize*2+space, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
         attackButton = new Button(screenWidth - 500, 200, buttonSize*2, buttonSize*2, buttonAttackTexture, buttonAttackDownTexture);
         pauseButton = new Button(screenWidth - buttonSize*2, screenHeight - buttonSize*2, buttonSize, buttonSize, buttonPauseTexture, buttonPauseTexture);
         musicButton = new Button(screenWidth - buttonSize*4, screenHeight - buttonSize*2, buttonSize, buttonSize, buttonUnmuteTexture, buttonMuteTexture);
