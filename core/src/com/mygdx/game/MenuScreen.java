@@ -19,9 +19,9 @@ public class MenuScreen implements Screen {
     Texture buttonStartTexture;
     Texture buttonStartDownTexture;
     Button startButton;
-    Texture buttonStopTexture;
-    Texture buttonStopDownTexture;
-    Button stopButton;
+    Texture buttonExitTexture;
+    Texture buttonExitDownTexture;
+    Button exitButton;
     public MenuScreen(MyGdxGame game){this.game = game;}
     public void create() {
             //---creates the components---
@@ -38,10 +38,8 @@ public class MenuScreen implements Screen {
             startButton = new Button(screenWidth /2 - 300f, screenHeight/2 - 150f, 600,300, buttonStartTexture,buttonStartDownTexture);
 
             //---set up Stop button---
-            buttonStopTexture = new Texture("Buttons/stop.png");
-            buttonStopDownTexture = new Texture("Buttons/stop_pressed.png");
-            stopButton = new Button(150,  200, 150,100, buttonStopTexture,buttonStopDownTexture);
-
+            buttonExitTexture = new Texture("Buttons/exit_btn.png");
+            exitButton = new Button(200,  150, 150,100, buttonExitTexture,buttonExitTexture);
     }
     @Override
     public void show() {
@@ -66,13 +64,18 @@ public class MenuScreen implements Screen {
             int touchY = Gdx.input.getY();
             //Poll user for input
             startButton.update(checkTouch, touchX, touchY);
+            exitButton.update(checkTouch, touchX, touchY);
             //Start game
             if(startButton.justPressed()){
                 Gdx.app.log("MenuScreen render:", "Start button pressed");
                 game.setScreen(game.gameScreen);
             }
+            if(exitButton.justPressed()){
+                Gdx.app.log("MenuScreen render:", "Stop button pressed");
+                Gdx.app.exit();
+            }
             startButton.draw(batch);
-            stopButton.draw(batch);
+            exitButton.draw(batch);
             batch.end();
             stage.draw();
         }
