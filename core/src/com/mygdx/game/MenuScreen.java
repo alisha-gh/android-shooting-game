@@ -26,7 +26,6 @@ public class MenuScreen implements Screen {
     public void create() {
             //---creates the components---
             batch = new SpriteBatch();
-            skin = new Skin(Gdx.files.internal("gui/uiskin.json"));
             stage = new Stage();
             //---set up the screen---
             float screenWidth = Gdx.graphics.getWidth();
@@ -35,7 +34,7 @@ public class MenuScreen implements Screen {
             //---set up Start button---
             buttonStartTexture = new Texture("Buttons/play.png");
             buttonStartDownTexture = new Texture("Buttons/play_pressed.png");
-            startButton = new Button(screenWidth /2 - 300f, screenHeight/2 - 150f, 600,300, buttonStartTexture,buttonStartDownTexture);
+            startButton = new Button(screenWidth/2 - 300f, screenHeight/2 - 200f, 600,400, buttonStartTexture,buttonStartDownTexture);
 
             //---set up Stop button---
             buttonExitTexture = new Texture("Buttons/exit_btn.png");
