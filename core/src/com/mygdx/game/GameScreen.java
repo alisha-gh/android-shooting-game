@@ -14,9 +14,13 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class GameScreen implements Screen {
+    private final MyGdxGame game;
     private OrthographicCamera camera;
     private Texture background;
-    private final MyGdxGame game;
+
+    float screenWidth = Gdx.graphics.getWidth();
+    float screenHeight = Gdx.graphics.getHeight();
+    float screenRatio = screenWidth / screenHeight; // Calculate the screen ratio
     public enum GameState { PLAYING, COMPLETE, PAUSE }
     GameState gameState = GameState.PLAYING;
     boolean restartActive;
@@ -89,9 +93,6 @@ public class GameScreen implements Screen {
         uiBatch = new SpriteBatch();
 
         //Camera
-        float screenWidth = Gdx.graphics.getWidth();
-        float screenHeight = Gdx.graphics.getHeight();
-        float screenRatio = screenWidth / screenHeight; // Calculate the screen ratio
         camera = new OrthographicCamera();
         background = new Texture(Gdx.files.internal("Backgrounds/07/Repeated.png"));
         float viewportWidth = background.getHeight() * screenRatio;
@@ -380,7 +381,6 @@ public class GameScreen implements Screen {
                     restartActive = true;
                 } else if (restartActive) {
                     newGame();
-                    restartActive = false;
                 }
             }
             break;
@@ -415,9 +415,12 @@ public class GameScreen implements Screen {
 
     private void newGame(){
         Gdx.app.log("new","game");
-        gameState = GameState.PLAYING;
         dt = 0.0f;
         playerSprite.setCenter(playerSprite.getWidth()/2,playerSprite.getWidth()/2);
+        playerPosition = new Vector2(100, screenHeight / 2 - playerSprite.getHeight() / 2); //set initial position
+        enemies.clear();
+        missiles.clear();
+        gameState = GameState.PLAYING;
         restartActive = false;
     }
 
