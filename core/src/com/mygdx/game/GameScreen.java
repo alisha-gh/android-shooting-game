@@ -90,6 +90,7 @@ public class GameScreen implements Screen {
     //Misic
     private Music backgroundMusicLevel1;
     private Music backgroundMusicLevel2;
+    private Music backgroundMusic;
     private boolean isMuted = false;
 
     //Scoring
@@ -172,7 +173,6 @@ public class GameScreen implements Screen {
         musicButton = new Button(screenWidth - buttonSize*4, topUIPaddingY, buttonSize, buttonSize, buttonUnmuteTexture, buttonMuteTexture);
 
         //Background Music
-        //TODO change based on level
         backgroundMusicLevel2 = Gdx.audio.newMusic(Gdx.files.internal("Music/neon-gaming-128925.mp3"));
         backgroundMusicLevel1 = Gdx.audio.newMusic(Gdx.files.internal("Music/pixelated-adventure-122039.mp3"));
         backgroundMusicLevel1.setLooping(true);
@@ -204,13 +204,7 @@ public class GameScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         update();
-        checkWin();
-        if((int)timer == 3){
-            level = 2;
-            backgroundMusicLevel1.stop();
-            backgroundMusicLevel2.setLooping(true);
-            backgroundMusicLevel2.play();
-        }
+        checkLevel();
 
         camera.update();
         spriteBatch.setProjectionMatrix(camera.combined);
@@ -333,12 +327,12 @@ public class GameScreen implements Screen {
             if (isMuted) { //is not playing music, pressed to unmute
                 isMuted = false;
                 musicButton.setTexture(buttonUnmuteTexture);
-                backgroundMusicLevel1.play();
+                backgroundMusic.play();
             }
             else { //is playing music, pressed to mute
                 isMuted = true;
                 musicButton.setTexture(buttonMuteTexture);
-                backgroundMusicLevel1.pause();
+                backgroundMusic.pause();
             }
         }
 
@@ -430,7 +424,7 @@ public class GameScreen implements Screen {
                 //Detect Player and Enemies Collisions
                 for(Vector2 enemy : enemies){
                     if (enemy.dst(playerPosition) < 200){  //Collide
-                        Gdx.app.log("Player and Enemy ", "Collision");
+                        Gdx.app.log("GameScreen update: ", "Player and Enemy Collision");
                         enemiesToRemove.add(enemy);
                         isDestroying = true;
                         gameState = GameState.COMPLETE;
@@ -472,10 +466,17 @@ public class GameScreen implements Screen {
         }
     }
 
-    private void checkWin() {
+    private void checkLevel() {
         if(score > 50 || timer > 180){
             win = true;
             gameState = GameState.COMPLETE;
+        }
+        if((int)timer == 60){
+            level = 2;
+            backgroundMusicLevel1.stop();
+            backgroundMusicLevel2.setLooping(true);
+            backgroundMusicLevel2.play();
+            backgroundMusic = backgroundMusicLevel2;
         }
     }
 
@@ -524,9 +525,6 @@ public class GameScreen implements Screen {
         win = false;
         level = 1;
         gameState = GameState.PLAYING;
-        backgroundMusicLevel2.stop();
-        backgroundMusicLevel1.setLooping(true);
-        backgroundMusicLevel1.play();
         restartActive = false;
     }
 
