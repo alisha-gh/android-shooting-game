@@ -255,9 +255,7 @@ public class GameScreen implements Screen {
         moveDownButton.draw(uiBatch);
         moveUpButton.draw(uiBatch);
         attackButton.draw(uiBatch);
-        if (gameState != GameState.COMPLETE){
-            pauseButton.draw(uiBatch);
-        }
+        pauseButton.draw(uiBatch);
         musicButton.draw(uiBatch);
         uiBatch.end();
         //Complete
