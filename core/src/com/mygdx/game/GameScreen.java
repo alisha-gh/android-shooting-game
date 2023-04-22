@@ -195,7 +195,7 @@ public class GameScreen implements Screen {
         dt = Gdx.graphics.getDeltaTime();
         update();
         checkWin();
-        //updateLevel();
+//        updateLevel();
 
         //Clear the screen every frame before drawing.
         Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -396,12 +396,12 @@ public class GameScreen implements Screen {
                 ArrayList<Vector2> enemiesToRemove = new ArrayList<Vector2>();
                 for(int i = 0; i < enemies.size(); i++){
                     float xPos = enemies.get(i).x;
-                    float difficulty = timer/5;
-                    //float difficulty = 1;
+                    float speed = level == 1 ? 500 : 660;
+                    enemies.get(i).add(new Vector2(-speed*dt, 0));
                     if(xPos < camera.viewportWidth/2){
-                        enemies.get(i).add(new Vector2(-650*dt*difficulty, 0));
+                        enemies.get(i).add(new Vector2(-(speed+100)*dt, 0));
                     }else{
-                        enemies.get(i).add(new Vector2(-500*dt*difficulty, 0));
+                        enemies.get(i).add(new Vector2(-speed*dt, 0));
                     }
                     if (enemies.get(i).x < -400) { //Remove the enemy when it's out of camera
                         enemiesToRemove.add(enemies.get(i));
