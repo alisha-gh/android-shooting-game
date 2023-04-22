@@ -21,7 +21,7 @@ public class GameScreen implements Screen {
     GameState gameState = GameState.PLAYING;
     boolean restartActive;
 
-    public static final float MOVEMENT_SPEED = 400.0f;
+    public static final float MOVEMENT_SPEED = 500.0f;
     float dt; //Game clock
 
     //Player Character
