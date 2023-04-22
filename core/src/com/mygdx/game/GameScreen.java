@@ -31,6 +31,7 @@ public class GameScreen implements Screen {
     boolean restartActive;
 
     public static final float MOVEMENT_SPEED = 500.0f;
+
     float dt; //Game clock
     private float timer;
     private BitmapFont timerFont;
@@ -395,10 +396,10 @@ public class GameScreen implements Screen {
                 ArrayList<Vector2> enemiesToRemove = new ArrayList<Vector2>();
                 for(int i = 0; i < enemies.size(); i++){
                     float xPos = enemies.get(i).x;
-                    //float difficulty = enemies.size()/2;
-                    float difficulty = 1;
+                    float difficulty = timer/5;
+                    //float difficulty = 1;
                     if(xPos < camera.viewportWidth/2){
-                        enemies.get(i).add(new Vector2(-600*dt*difficulty, 0));
+                        enemies.get(i).add(new Vector2(-650*dt*difficulty, 0));
                     }else{
                         enemies.get(i).add(new Vector2(-500*dt*difficulty, 0));
                     }
@@ -436,8 +437,6 @@ public class GameScreen implements Screen {
                         }
                     }
                 }
-                Gdx.app.log("Player score ", String.valueOf(score));
-
 
                 //Remove
                 for (Vector2 missile : missilesToRemove) {
@@ -470,7 +469,7 @@ public class GameScreen implements Screen {
     }
 
     private void updateLevel(){
-        if(timer > 3){
+        if(timer > 120){
             level = 2;
             backgroundMusicLevel1.stop();
             backgroundMusicLevel2.setLooping(true);

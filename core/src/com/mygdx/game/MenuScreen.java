@@ -51,7 +51,7 @@ public class MenuScreen implements Screen {
     @Override
     public void render(float delta) {
         Gdx.app.log("MenuScreen: ","menuScreen render");
-        Gdx.gl.glClearColor(0, 0, 0, 1); // Set the clear color (background color)
+        Gdx.gl.glClearColor(30/255f, 80/255f, 140/255f, 1); // Set the clear color (background color)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); // Clear the screen
 
         if(isActive){
