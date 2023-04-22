@@ -31,6 +31,8 @@ public class GameScreen implements Screen {
 
     public static final float MOVEMENT_SPEED = 500.0f;
     float dt; //Game clock
+    private float timer;
+    private BitmapFont timerFont;
 
     //Player Character
     private Texture[] playerMovingTextures;
@@ -163,10 +165,15 @@ public class GameScreen implements Screen {
         backgroundMusic.setLooping(true);
         backgroundMusic.play();
 
-        //Create font
+        //Create Score Font
         scoreFont = new BitmapFont();
         scoreFont.setColor(Color.WHITE);
         scoreFont.getData().setScale(6f);
+
+        //Create Timer Font
+        timerFont = new BitmapFont();
+        timerFont.setColor(Color.WHITE);
+        timerFont.getData().setScale(6f);
 
         newGame();
     }
@@ -234,7 +241,11 @@ public class GameScreen implements Screen {
         }
 
         //Show score
-        scoreFont.draw(spriteBatch, "Score " + score, screenWidth*0.05f, topUIPaddingY+3.0f);
+        scoreFont.draw(spriteBatch, "Score " + score, screenWidth*0.05f, topUIPaddingY+20.0f);
+        int minutes = (int)timer / 60;
+        int seconds = (int)timer % 60;
+        String timeStr = String.format("%02d:%02d", minutes, seconds);
+        timerFont.draw(spriteBatch, timeStr, screenWidth*0.5f-20.0f, topUIPaddingY+20.0f);
         spriteBatch.end();
 
         //Draw UI
@@ -301,6 +312,8 @@ public class GameScreen implements Screen {
         //Update Game State based on input
         switch (gameState) {
             case PLAYING: {
+                timer += dt;
+
                 int moveX = 0;
                 int moveY = 0;
                 if (moveLeftButton.isDown) {
@@ -467,6 +480,7 @@ public class GameScreen implements Screen {
         enemies.clear();
         missiles.clear();
         score = 0;
+        timer = 0;
         gameState = GameState.PLAYING;
         restartActive = false;
     }
