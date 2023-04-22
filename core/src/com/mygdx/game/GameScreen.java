@@ -168,7 +168,7 @@ public class GameScreen implements Screen {
         moveDownButton = new Button(buttonSize+space, space, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
         moveUpButton = new Button(buttonSize+space, buttonSize*2+space, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
         attackButton = new Button(screenWidth - 500, 200, buttonSize*2, buttonSize*2, buttonAttackTexture, buttonAttackDownTexture);
-        restartButton = new Button(screenWidth/2 - buttonSize*2, screenHeight/2 - buttonSize, buttonSize*4, buttonSize*2, buttonRestartTexture, buttonRestartDownTexture);
+        restartButton = new Button(screenWidth/2 - buttonSize*2, screenHeight/2 - buttonSize, buttonSize*4, buttonSize*2+50, buttonRestartTexture, buttonRestartDownTexture);
         pauseButton = new Button(screenWidth - buttonSize*2, topUIPaddingY, buttonSize, buttonSize, buttonPauseTexture, buttonPauseTexture);
         musicButton = new Button(screenWidth - buttonSize*4, topUIPaddingY, buttonSize, buttonSize, buttonUnmuteTexture, buttonMuteTexture);
 
@@ -338,6 +338,11 @@ public class GameScreen implements Screen {
             }
         }
 
+        //Update mute
+        if(isMuted){
+            backgroundMusic.pause();
+        }
+
         //Update Game State based on input
         switch (gameState) {
             case PLAYING: {
@@ -470,7 +475,7 @@ public class GameScreen implements Screen {
     }
 
     private void checkLevel() {
-        if(score > 50 || timer > 180){
+        if(score > 50 || timer > 120){
             win = true;
             gameState = GameState.COMPLETE;
         }
