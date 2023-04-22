@@ -117,8 +117,8 @@ public class GameScreen implements Screen {
         missileTexture = new Texture("missile.png");
         buttonAttackTexture = new Texture("Buttons/shoot_btn.png");
         buttonAttackDownTexture = new Texture("Buttons/shoot_btn_pressed.png");
-        buttonPauseTexture = new Texture("Buttons/pause-Btn.png");
-        buttonPlayTexture = new Texture("Buttons/play-Btn.png");
+        buttonPauseTexture = new Texture("Buttons/pause_btn.png");
+        buttonPlayTexture = new Texture("Buttons/play_btn.png");
 
         //Player
         playerSprite = new Sprite(playerMovingTextures[0]);

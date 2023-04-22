@@ -19,6 +19,9 @@ public class MenuScreen implements Screen {
     Texture buttonStartTexture;
     Texture buttonStartDownTexture;
     Button startButton;
+    Texture buttonStopTexture;
+    Texture buttonStopDownTexture;
+    Button stopButton;
     public MenuScreen(MyGdxGame game){this.game = game;}
     public void create() {
             //---creates the components---
@@ -31,8 +34,14 @@ public class MenuScreen implements Screen {
 
             //---set up Start button---
             buttonStartTexture = new Texture("Buttons/play.png");
-            buttonStartDownTexture = new Texture("Buttons/stop.png");
-            startButton = new Button(screenWidth /2 - 300f, screenHeight/2 - 200f, 500,300, buttonStartTexture,buttonStartDownTexture);
+            buttonStartDownTexture = new Texture("Buttons/play_pressed.png");
+            startButton = new Button(screenWidth /2 - 300f, screenHeight/2 - 150f, 600,300, buttonStartTexture,buttonStartDownTexture);
+
+            //---set up Stop button---
+            buttonStopTexture = new Texture("Buttons/stop.png");
+            buttonStopDownTexture = new Texture("Buttons/stop_pressed.png");
+            stopButton = new Button(150,  200, 150,100, buttonStopTexture,buttonStopDownTexture);
+
     }
     @Override
     public void show() {
@@ -63,7 +72,7 @@ public class MenuScreen implements Screen {
                 game.setScreen(game.gameScreen);
             }
             startButton.draw(batch);
-
+            stopButton.draw(batch);
             batch.end();
             stage.draw();
         }
