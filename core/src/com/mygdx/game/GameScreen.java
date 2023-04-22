@@ -176,7 +176,9 @@ public class GameScreen implements Screen {
         backgroundMusicLevel2 = Gdx.audio.newMusic(Gdx.files.internal("Music/neon-gaming-128925.mp3"));
         backgroundMusicLevel1 = Gdx.audio.newMusic(Gdx.files.internal("Music/pixelated-adventure-122039.mp3"));
         backgroundMusicLevel1.setLooping(true);
-        backgroundMusicLevel1.play();
+        backgroundMusicLevel2.setLooping(true);
+        backgroundMusic = backgroundMusicLevel1;
+        backgroundMusic.play();
 
         //Create Score Font
         scoreFont = new BitmapFont();
@@ -388,7 +390,8 @@ public class GameScreen implements Screen {
                 Random random = new Random();
                 int randomNum = random.nextInt(200);
                 int randomY = random.nextInt((int)camera.viewportHeight-150);
-                if (System.currentTimeMillis() > lastEnemyCreatedTime + 2000) {
+                int frequency = level == 1 ? 2000 : 800;
+                if (System.currentTimeMillis() > lastEnemyCreatedTime + frequency) {
                     lastEnemyCreatedTime = System.currentTimeMillis();
                     Vector2 newEnemy = new Vector2(camera.viewportWidth + randomNum, randomY);
                     enemies.add(newEnemy);
@@ -471,12 +474,11 @@ public class GameScreen implements Screen {
             win = true;
             gameState = GameState.COMPLETE;
         }
-        if((int)timer == 60){
+        if((int)timer == 20){
             level = 2;
-            backgroundMusicLevel1.stop();
-            backgroundMusicLevel2.setLooping(true);
-            backgroundMusicLevel2.play();
-            backgroundMusic = backgroundMusicLevel2;
+            backgroundMusic.stop();  //stop current music
+            backgroundMusic = backgroundMusicLevel2; //change to level 2 music
+            backgroundMusic.play();
         }
     }
 
@@ -523,6 +525,9 @@ public class GameScreen implements Screen {
         score = 0;
         timer = 0;
         win = false;
+        backgroundMusic.stop(); //stop current music
+        backgroundMusic = backgroundMusicLevel1; //set to level 1 music
+        backgroundMusic.play();
         level = 1;
         gameState = GameState.PLAYING;
         restartActive = false;
