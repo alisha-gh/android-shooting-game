@@ -19,7 +19,7 @@ import java.util.Random;
 public class GameScreen implements Screen {
     private final MyGdxGame game;
     private OrthographicCamera camera;
-    private Texture background;
+    private Texture backgroundTexture;
     float backgroundX = 0;
     float screenWidth = Gdx.graphics.getWidth();
     float screenHeight = Gdx.graphics.getHeight();
@@ -85,7 +85,8 @@ public class GameScreen implements Screen {
     Button musicButton;
 
     //Misic
-    private Music backgroundMusic;
+    private Music backgroundMusicLevel1;
+    private Music backgroundMusicLevel2;
     private boolean isMuted = false;
 
     //Scoring
@@ -94,6 +95,7 @@ public class GameScreen implements Screen {
     private Texture victoryTexture;
     private Sprite victorySprite;
     private boolean win = false;
+    private int level = 1;
 
     // constructor to keep a reference to the main Game class
     public GameScreen(MyGdxGame game) {
@@ -109,11 +111,11 @@ public class GameScreen implements Screen {
         spriteBatch = new SpriteBatch();
         uiBatch = new SpriteBatch();
 
-        //Camera
+        //Camera and Background
         camera = new OrthographicCamera();
-        background = new Texture(Gdx.files.internal("Backgrounds/07/Repeated.png"));
-        float viewportWidth = background.getHeight() * screenRatio;
-        camera.setToOrtho(false, viewportWidth, background.getHeight());
+        backgroundTexture = new Texture(Gdx.files.internal("Backgrounds/07/Repeated.png"));
+        float viewportWidth = backgroundTexture.getHeight() * screenRatio;
+        camera.setToOrtho(false, viewportWidth, backgroundTexture.getHeight());
 
         //Textures
         playerMovingTextures = new Texture[14];
@@ -165,10 +167,10 @@ public class GameScreen implements Screen {
         musicButton = new Button(screenWidth - buttonSize*4, topUIPaddingY, buttonSize, buttonSize, buttonUnmuteTexture, buttonMuteTexture);
 
         //Background Music
-//        backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("Music/neon-gaming-128925.mp3"));
-        backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("Music/pixelated-adventure-122039.mp3"));
-        backgroundMusic.setLooping(true);
-        backgroundMusic.play();
+        backgroundMusicLevel2 = Gdx.audio.newMusic(Gdx.files.internal("Music/neon-gaming-128925.mp3"));
+        backgroundMusicLevel1 = Gdx.audio.newMusic(Gdx.files.internal("Music/pixelated-adventure-122039.mp3"));
+        backgroundMusicLevel1.setLooping(true);
+        backgroundMusicLevel1.play();
 
         //Create Score Font
         scoreFont = new BitmapFont();
@@ -192,6 +194,7 @@ public class GameScreen implements Screen {
         dt = Gdx.graphics.getDeltaTime();
         update();
         checkWin();
+        updateLevel();
 
         //Clear the screen every frame before drawing.
         Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -201,8 +204,8 @@ public class GameScreen implements Screen {
         camera.update();
         spriteBatch.setProjectionMatrix(camera.combined);
         spriteBatch.begin();
-        spriteBatch.draw(background, backgroundX, 0);  //first background
-        spriteBatch.draw(background, backgroundX+background.getWidth(), 0); //second background
+        spriteBatch.draw(backgroundTexture, backgroundX, 0);  //first background
+        spriteBatch.draw(backgroundTexture, backgroundX+ backgroundTexture.getWidth(), 0); //second background
 
         //Player Animation
         playerMovingFrame += 10 * dt;
@@ -318,12 +321,12 @@ public class GameScreen implements Screen {
             if (isMuted) { //is not playing music, pressed to unmute
                 isMuted = false;
                 musicButton.setTexture(buttonUnmuteTexture);
-                backgroundMusic.play();
+                backgroundMusicLevel1.play();
             }
             else { //is playing music, pressed to mute
                 isMuted = true;
                 musicButton.setTexture(buttonMuteTexture);
-                backgroundMusic.pause();
+                backgroundMusicLevel1.pause();
             }
         }
 
@@ -360,8 +363,8 @@ public class GameScreen implements Screen {
                 //Move Background
                 backgroundX -= 800 * dt;
                 //Reposition the background when it goes out of scope
-                if(backgroundX < -background.getWidth()){
-                    backgroundX += background.getWidth();
+                if(backgroundX < -backgroundTexture.getWidth()){
+                    backgroundX += backgroundTexture.getWidth();
                 }
 
                 //Determine Character Movement Distance
@@ -466,11 +469,21 @@ public class GameScreen implements Screen {
         }
     }
 
+    private void updateLevel(){
+        if(timer > 3){
+            level = 2;
+            backgroundMusicLevel1.stop();
+            backgroundMusicLevel2.setLooping(true);
+            backgroundMusicLevel2.play();
+            backgroundTexture = new Texture(Gdx.files.internal("Backgrounds/02/Repeated.png"));
+        }
+    }
+
     @Override
     public void dispose() {
         spriteBatch.dispose();
-        if (background != null) {
-            background.dispose();
+        if (backgroundTexture != null) {
+            backgroundTexture.dispose();
         }
         for (Texture playerMovingTexture : playerMovingTextures){
             playerMovingTexture.dispose();
@@ -507,7 +520,12 @@ public class GameScreen implements Screen {
         score = 0;
         timer = 0;
         win = false;
+        level = 1;
         gameState = GameState.PLAYING;
+        backgroundTexture = new Texture(Gdx.files.internal("Backgrounds/07/Repeated.png"));
+        backgroundMusicLevel2.stop();
+        backgroundMusicLevel1.setLooping(true);
+        backgroundMusicLevel1.play();
         restartActive = false;
     }
 
