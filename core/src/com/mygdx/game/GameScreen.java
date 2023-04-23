@@ -3,6 +3,7 @@ package com.mygdx.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -108,6 +109,10 @@ public class GameScreen implements Screen {
     private boolean win = false;
     private int level = 1;
 
+    //Sound Effect
+    Sound shootSound;
+    Sound collisionSound;
+
     // constructor to keep a reference to the main Game class
     public GameScreen(MyGdxGame game) {
         this.game = game;
@@ -192,6 +197,10 @@ public class GameScreen implements Screen {
         backgroundMusicLevel2.setLooping(true);
         backgroundMusic = backgroundMusicLevel1;
         backgroundMusic.play();
+
+        //Shooting sound effect
+        shootSound = Gdx.audio.newSound(Gdx.files.internal("Sound/shoot.mp3"));
+        collisionSound = Gdx.audio.newSound(Gdx.files.internal("Sound/explosion.mp3"));
 
         //Create Score Font
         scoreFont = new BitmapFont();
@@ -386,11 +395,13 @@ public class GameScreen implements Screen {
                     moveUpButton.isDown = true;
                     moveY += 1;
                 }
+
+                //Shoot Button
                 if (attackButton.justPressed()) {
                     attackButton.isDown = true;
-                    Gdx.app.log("Attack Button is Pressed", String.valueOf(attackButton.isDown));
                     attackButton.isDownPrev = true;
                     this.missiles.add(new Vector2(playerPosition.x + playerSprite.getWidth(), playerPosition.y));
+                    shootSound.play();
                 }
 
                 //Move Background
@@ -453,7 +464,7 @@ public class GameScreen implements Screen {
                 }
 
                 //Enemy Missiles
-                if (System.currentTimeMillis() > lastEnemyShootTime + 1500 && (int)timer >= 3) {
+                if (System.currentTimeMillis() > lastEnemyShootTime + 1500 && (int)timer >= 3 && enemies.size() > 0) {
                     lastEnemyShootTime = System.currentTimeMillis();
                     int randomEnemyIndex = random.nextInt(enemies.size());
                     Vector2 newEnemyMissile = new Vector2(enemies.get(randomEnemyIndex).x - enemySprites.get(randomEnemyIndex).getWidth()/2, enemies.get(randomEnemyIndex).y);
@@ -461,7 +472,7 @@ public class GameScreen implements Screen {
                 }
                 ArrayList<Vector2> enemyMissilesToRemove = new ArrayList<Vector2>();
                 for (Vector2 enemyMissile : enemyMissiles){
-                    float speed = level == 1 ? 1300 : 1700;
+                    float speed = level == 1 ? 1500 : 1700;
                     enemyMissile.add(-speed*dt, 0);
                     if (enemyMissile.x > camera.viewportWidth - 200) { //Remove the missiles when it's out of camera
                         enemyMissilesToRemove.add(enemyMissile);
@@ -471,10 +482,10 @@ public class GameScreen implements Screen {
                 //Detect Player and Enemies Collisions
                 for(Vector2 enemy : enemies){
                     if (enemy.dst(playerPosition) < 200){  //Collide
-                        Gdx.app.log("GameScreen update: ", "Player and Enemy Collision");
                         enemiesToRemove.add(enemy);
                         isDestroying = true;
                         gameState = GameState.COMPLETE;
+                        collisionSound.play();
                     }
                 }
 
@@ -492,11 +503,11 @@ public class GameScreen implements Screen {
 
                 //Detect Player and enemy Missiles Collisions
                 for(Vector2 enemyMissile : enemyMissiles){
-                    if (enemyMissile.dst(playerPosition) < 80){  //Collide
-                        Gdx.app.log("GameScreen update: ", "Player and Enemy Collision");
+                    if (enemyMissile.dst(playerPosition) < 200){  //Collide
                         enemyMissilesToRemove.add(enemyMissile);
                         isDestroying = true;
                         gameState = GameState.COMPLETE;
+                        collisionSound.play();
                     }
                 }
 
@@ -571,6 +582,10 @@ public class GameScreen implements Screen {
         scoreFont.dispose();
         spriteBatch.dispose();
         uiBatch.dispose();
+        backgroundMusicLevel1.dispose();
+        backgroundMusicLevel2.dispose();
+        shootSound.dispose();
+        collisionSound.dispose();
     }
 
     private void newGame(){
