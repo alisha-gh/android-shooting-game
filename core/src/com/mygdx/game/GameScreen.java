@@ -530,7 +530,7 @@ public class GameScreen implements Screen {
     private void enemies(){
         //Generate Enemies
         int randomNum = random.nextInt(200);
-        int randomY = random.nextInt((int)camera.viewportHeight-(int)enemyHeight/2);
+        int randomY = random.nextInt((int)camera.viewportHeight-((int)enemyHeight/2)-20);
         int frequency = level == 1 ? 2000 : 800;
         if (System.currentTimeMillis() > lastEnemyCreatedTime + frequency) {
             lastEnemyCreatedTime = System.currentTimeMillis();
