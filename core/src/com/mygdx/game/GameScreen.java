@@ -61,6 +61,13 @@ public class GameScreen implements Screen {
     Vector2 missilePosition;
     ArrayList<Vector2> missiles = new ArrayList<Vector2>();
 
+    //Enemy Missile
+    Texture enemyMissileTexture;
+    Sprite enemyMissileSprite;
+    Vector2 enemyMissilePosition;
+    ArrayList<Vector2> enemyMissiles = new ArrayList<Vector2>();
+    long lastEnemyShootTime = 0;
+
     //Batch
     SpriteBatch spriteBatch;
     SpriteBatch uiBatch; //Second SpriteBatch without camera transforms, for drawing UI
@@ -141,6 +148,7 @@ public class GameScreen implements Screen {
         buttonRestartTexture = new Texture("Buttons/play_purple.png");
         buttonRestartDownTexture = new Texture("Buttons/play_pressed_purple.png");
         missileTexture = new Texture("missile.png");
+        enemyMissileTexture = new Texture("missile_enemy.png");
         buttonAttackTexture = new Texture("Buttons/shoot_btn.png");
         buttonAttackDownTexture = new Texture("Buttons/shoot_btn_pressed.png");
         buttonPauseTexture = new Texture("Buttons/pause_btn.png");
@@ -159,6 +167,11 @@ public class GameScreen implements Screen {
         missileSprite = new Sprite(missileTexture);
         missileSprite.setSize(160, 80);
         missilePosition = new Vector2(playerPosition.x + playerSprite.getWidth(), 1000);
+
+        //Missile
+        enemyMissileSprite = new Sprite(enemyMissileTexture);
+        enemyMissileSprite.setSize(160, 80);
+        //enemyMissilePosition = new Vector2(enemyMissilePosition.x + enemyMissileSprite.getWidth(), 1000);
 
         //Buttons
         float buttonSize = screenHeight * 0.1f;
@@ -246,6 +259,13 @@ public class GameScreen implements Screen {
             missileSprite.setX(missiles.get(i).x);
             missileSprite.setY(missiles.get(i).y);
             missileSprite.draw(spriteBatch);
+        }
+
+        //Draw Enemy Missiles
+        for (int i=0; i < this.enemyMissiles.size(); i++) {
+            enemyMissileSprite.setX(enemyMissiles.get(i).x);
+            enemyMissileSprite.setY(enemyMissiles.get(i).y);
+            enemyMissileSprite.draw(spriteBatch);
         }
 
         //Player and Enemy Collision
@@ -406,11 +426,13 @@ public class GameScreen implements Screen {
                     enemySprites.add(newEnemySprite);
                 }
 
+                //Move Enemies
                 ArrayList<Vector2> enemiesToRemove = new ArrayList<Vector2>();
                 for(int i = 0; i < enemies.size(); i++){
                     float xPos = enemies.get(i).x;
                     float speed = level == 1 ? 500 : 700;
                     enemies.get(i).add(new Vector2(-speed*dt, 0));
+                    //Increase speed toward left screen
                     if(xPos < camera.viewportWidth/2){
                         enemies.get(i).add(new Vector2(-(speed+100)*dt, 0));
                     }else{
@@ -420,6 +442,7 @@ public class GameScreen implements Screen {
                         enemiesToRemove.add(enemies.get(i));
                     }
                 }
+                //Move Missiles
                 ArrayList<Vector2> missilesToRemove = new ArrayList<Vector2>();
                 for (int i = 0; i < missiles.size(); i++) {
                     //Move Missile
@@ -427,6 +450,18 @@ public class GameScreen implements Screen {
                     if (missiles.get(i).x > camera.viewportWidth + 200) { //Remove the missiles when it's out of camera
                         missilesToRemove.add(missiles.get(i));
                     }
+                }
+
+                //Enemy Missiles
+                if (System.currentTimeMillis() > lastEnemyShootTime + 3000 && (int)timer >= 3) {
+                    lastEnemyShootTime = System.currentTimeMillis();
+                    int randomEnemyIndex = random.nextInt(enemies.size());
+                    Vector2 newEnemyMissile = new Vector2(enemies.get(randomEnemyIndex).x - enemySprites.get(randomEnemyIndex).getWidth()/2, enemies.get(randomEnemyIndex).y);
+                    enemyMissiles.add(newEnemyMissile);
+                }
+                for (Vector2 enemyMissile : enemyMissiles){
+                    float speed = level == 1 ? 1300 : 1700;
+                    enemyMissile.add(-speed*dt, 0);
                 }
 
                 //Detect Player and Enemies Collisions
