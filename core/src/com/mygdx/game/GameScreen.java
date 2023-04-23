@@ -459,9 +459,13 @@ public class GameScreen implements Screen {
                     Vector2 newEnemyMissile = new Vector2(enemies.get(randomEnemyIndex).x - enemySprites.get(randomEnemyIndex).getWidth()/2, enemies.get(randomEnemyIndex).y);
                     enemyMissiles.add(newEnemyMissile);
                 }
+                ArrayList<Vector2> enemyMissilesToRemove = new ArrayList<Vector2>();
                 for (Vector2 enemyMissile : enemyMissiles){
                     float speed = level == 1 ? 1300 : 1700;
                     enemyMissile.add(-speed*dt, 0);
+                    if (enemyMissile.x > camera.viewportWidth - 200) { //Remove the missiles when it's out of camera
+                        enemyMissilesToRemove.add(enemyMissile);
+                    }
                 }
 
                 //Detect Player and Enemies Collisions
@@ -486,12 +490,25 @@ public class GameScreen implements Screen {
                     }
                 }
 
+                //Detect Player and enemy Missiles Collisions
+                for(Vector2 enemyMissile : enemyMissiles){
+                    if (enemyMissile.dst(playerPosition) < 80){  //Collide
+                        Gdx.app.log("GameScreen update: ", "Player and Enemy Collision");
+                        enemyMissilesToRemove.add(enemyMissile);
+                        isDestroying = true;
+                        gameState = GameState.COMPLETE;
+                    }
+                }
+
                 //Remove
                 for (Vector2 missile : missilesToRemove) {
                     missiles.remove(missile);
                 }
                 for (Vector2 enemy : enemiesToRemove) {
                     enemies.remove(enemy);
+                }
+                for (Vector2 enemyMissile : enemyMissilesToRemove) {
+                    enemyMissiles.remove(enemyMissile);
                 }
             }
             break;
