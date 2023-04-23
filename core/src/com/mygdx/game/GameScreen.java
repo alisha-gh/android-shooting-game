@@ -453,7 +453,7 @@ public class GameScreen implements Screen {
                 }
 
                 //Enemy Missiles
-                if (System.currentTimeMillis() > lastEnemyShootTime + 3000 && (int)timer >= 3) {
+                if (System.currentTimeMillis() > lastEnemyShootTime + 1500 && (int)timer >= 3) {
                     lastEnemyShootTime = System.currentTimeMillis();
                     int randomEnemyIndex = random.nextInt(enemies.size());
                     Vector2 newEnemyMissile = new Vector2(enemies.get(randomEnemyIndex).x - enemySprites.get(randomEnemyIndex).getWidth()/2, enemies.get(randomEnemyIndex).y);
