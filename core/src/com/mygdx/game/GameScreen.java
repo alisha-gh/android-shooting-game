@@ -62,6 +62,8 @@ public class GameScreen implements Screen {
     private ArrayList<Vector2> enemies = new ArrayList<>();
     long lastEnemyCreatedTime = 0;
     ArrayList<Vector2> enemiesToRemove = new ArrayList<>();
+    private float enemyHeight = 320;
+    private float enemyWidth = 320;
 
     //Player Missile
     private Texture missileTexture;
@@ -95,13 +97,13 @@ public class GameScreen implements Screen {
 
     //UI Buttons
     private Button moveLeftButton;
-    private  Button moveRightButton;
+    private Button moveRightButton;
     private Button moveDownButton;
     private Button moveUpButton;
     private Button restartButton;
-    private  Button shootButton;
-    private  Button pauseButton;
-    private   Button musicButton;
+    private Button shootButton;
+    private Button pauseButton;
+    private Button musicButton;
 
     //Music
     private Music backgroundMusicLevel1;
@@ -528,14 +530,14 @@ public class GameScreen implements Screen {
     private void enemies(){
         //Generate Enemies
         int randomNum = random.nextInt(200);
-        int randomY = random.nextInt((int)camera.viewportHeight-150);
+        int randomY = random.nextInt((int)camera.viewportHeight-(int)enemyHeight/2);
         int frequency = level == 1 ? 2000 : 800;
         if (System.currentTimeMillis() > lastEnemyCreatedTime + frequency) {
             lastEnemyCreatedTime = System.currentTimeMillis();
             Vector2 newEnemy = new Vector2(camera.viewportWidth + randomNum, randomY);
             enemies.add(newEnemy);
             Sprite newEnemySprite = new Sprite(enemyMovingTextures[0]);
-            newEnemySprite.setSize(320,320);
+            newEnemySprite.setSize(enemyHeight,enemyWidth);
             newEnemySprite.setPosition(newEnemy.x, newEnemy.y);
             enemySprites.add(newEnemySprite);
         }
@@ -614,7 +616,7 @@ public class GameScreen implements Screen {
         //Detect Enemies and Missiles Collisions
         for(Vector2 missile : missiles){
             for(Vector2 enemy : enemies){
-                if (missile.dst(new Vector2(enemy.x + (320 / 2), enemy.y + (320 / 2))) < 200) {
+                if (missile.dst(new Vector2(enemy.x + (enemyWidth / 2), enemy.y + (enemyHeight / 2))) < 200) {
                     //200 is the enemy's size
                     enemiesToRemove.add(enemy);
                     missilesToRemove.add(missile);
