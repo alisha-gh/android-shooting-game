@@ -19,23 +19,28 @@ import java.util.Random;
 
 public class GameScreen implements Screen {
     private final MyGdxGame game;
+    //Screen and Camera
     private OrthographicCamera camera;
+    float screenWidth = Gdx.graphics.getWidth();
+    float screenHeight = Gdx.graphics.getHeight();
+    float screenRatio = screenWidth / screenHeight; // Calculate the screen ratio
+    private final float topUIPaddingY = screenHeight * 0.85f;
+
+    //Background
     private Texture backgroundTextureLevel1;
     private Texture backgroundTextureLevel2;
     private Texture backgroundTexture;
     float backgroundX = 0;
-    float screenWidth = Gdx.graphics.getWidth();
-    float screenHeight = Gdx.graphics.getHeight();
-    float screenRatio = screenWidth / screenHeight; // Calculate the screen ratio
-    private float topUIPaddingY = screenHeight * 0.85f;
 
+    //Game State
     public enum GameState { PLAYING, COMPLETE, PAUSE }
-    GameState gameState = GameState.PLAYING;
+    private GameState gameState = GameState.PLAYING;
     boolean restartActive;
 
     public static final float MOVEMENT_SPEED = 500.0f;
 
-    float dt; //Game clock
+    //Game clock
+    float dt;
     private float timer;
     private BitmapFont timerFont;
 
@@ -44,58 +49,57 @@ public class GameScreen implements Screen {
     private float playerMovingFrame = 0;
     private Texture[] playerDestroyingTextures;
     private float playerDestroyingFrame = 0;
-    Sprite playerSprite;
-    Vector2 playerVector;
-    Vector2 playerPosition;
+    private Sprite playerSprite;
+    private Vector2 playerVector;
+    private Vector2 playerPosition;
     boolean isDestroying = false;
 
     //Enemy Character
     private Texture[] enemyMovingTextures;
     private float enemyMovingFrame = 0;
-    ArrayList<Sprite> enemySprites = new ArrayList<Sprite>();
-    ArrayList<Vector2> enemies = new ArrayList<Vector2>();
+    private ArrayList<Sprite> enemySprites = new ArrayList<>();
+    private ArrayList<Vector2> enemies = new ArrayList<>();
     long lastEnemyCreatedTime = 0;
 
-    //Missile
-    Texture missileTexture;
-    Sprite missileSprite;
-    Vector2 missilePosition;
-    ArrayList<Vector2> missiles = new ArrayList<Vector2>();
+    //Player Missile
+    private Texture missileTexture;
+    private Sprite missileSprite;
+    private Vector2 missilePosition;
+    private ArrayList<Vector2> missiles = new ArrayList<>();
 
     //Enemy Missile
-    Texture enemyMissileTexture;
-    Sprite enemyMissileSprite;
-    Vector2 enemyMissilePosition;
-    ArrayList<Vector2> enemyMissiles = new ArrayList<Vector2>();
+    private Texture enemyMissileTexture;
+    private Sprite enemyMissileSprite;
+    private ArrayList<Vector2> enemyMissiles = new ArrayList<>();
     long lastEnemyShootTime = 0;
 
     //Batch
-    SpriteBatch spriteBatch;
-    SpriteBatch uiBatch; //Second SpriteBatch without camera transforms, for drawing UI
+    private  SpriteBatch spriteBatch;
+    private SpriteBatch uiBatch; //Second SpriteBatch without camera transforms, for drawing UI
 
     //UI textures
-    Texture buttonSquareTexture;
-    Texture buttonSquareDownTexture;
-    Texture buttonRestartTexture;
-    Texture buttonRestartDownTexture;
-    Texture buttonAttackTexture;
-    Texture buttonAttackDownTexture;
-    Texture buttonPauseTexture;
-    Texture buttonResumeTexture;
-    Texture buttonMuteTexture;
-    Texture buttonUnmuteTexture;
+    private  Texture buttonSquareTexture;
+    private Texture buttonSquareDownTexture;
+    private Texture buttonRestartTexture;
+    private Texture buttonRestartDownTexture;
+    private Texture buttonAttackTexture;
+    private Texture buttonAttackDownTexture;
+    private Texture buttonPauseTexture;
+    private Texture buttonResumeTexture;
+    private Texture buttonMuteTexture;
+    private Texture buttonUnmuteTexture;
 
     //UI Buttons
-    Button moveLeftButton;
-    Button moveRightButton;
-    Button moveDownButton;
-    Button moveUpButton;
-    Button restartButton;
-    Button attackButton;
-    Button pauseButton;
-    Button musicButton;
+    private Button moveLeftButton;
+    private  Button moveRightButton;
+    private Button moveDownButton;
+    private Button moveUpButton;
+    private Button restartButton;
+    private  Button attackButton;
+    private  Button pauseButton;
+    private   Button musicButton;
 
-    //Misic
+    //Music
     private Music backgroundMusicLevel1;
     private Music backgroundMusicLevel2;
     private Music backgroundMusic;
@@ -104,14 +108,13 @@ public class GameScreen implements Screen {
     //Scoring
     private int score = 0;
     private BitmapFont scoreFont;
-    private Texture victoryTexture;
     private Sprite victorySprite;
     private boolean win = false;
     private int level = 1;
 
     //Sound Effect
-    Sound shootSound;
-    Sound collisionSound;
+    private  Sound shootSound;
+    private  Sound collisionSound;
 
     // constructor to keep a reference to the main Game class
     public GameScreen(MyGdxGame game) {
@@ -160,7 +163,7 @@ public class GameScreen implements Screen {
         buttonResumeTexture = new Texture("Buttons/resume_btn.png");
         buttonMuteTexture = new Texture("Buttons/mute_btn.png");
         buttonUnmuteTexture = new Texture("Buttons/unmute_btn.png");
-        victoryTexture = new Texture("victory.png");
+        Texture victoryTexture = new Texture("victory.png");
 
         //Player
         playerSprite = new Sprite(playerMovingTextures[0]);
@@ -352,6 +355,9 @@ public class GameScreen implements Screen {
                 pauseButton.setTexture(buttonResumeTexture);
             }
         }
+        if (gameState == GameState.PLAYING){
+            pauseButton.setTexture(buttonPauseTexture);
+        }
 
         //Mute and Unmute Button
         if (musicButton.justPressed()) {
@@ -380,19 +386,15 @@ public class GameScreen implements Screen {
                 int moveX = 0;
                 int moveY = 0;
                 if (moveLeftButton.isDown) {
-                    moveLeftButton.isDown = true;
                     moveX -= 1;
                 }
                 if (moveRightButton.isDown) {
-                    moveRightButton.isDown = true;
                     moveX += 1;
                 }
                 if (moveDownButton.isDown) {
-                    moveDownButton.isDown = true;
                     moveY -= 1;
                 }
                 if (moveUpButton.isDown) {
-                    moveUpButton.isDown = true;
                     moveY += 1;
                 }
 
@@ -438,7 +440,7 @@ public class GameScreen implements Screen {
                 }
 
                 //Move Enemies
-                ArrayList<Vector2> enemiesToRemove = new ArrayList<Vector2>();
+                ArrayList<Vector2> enemiesToRemove = new ArrayList<>();
                 for(int i = 0; i < enemies.size(); i++){
                     float xPos = enemies.get(i).x;
                     float speed = level == 1 ? 500 : 700;
@@ -454,7 +456,7 @@ public class GameScreen implements Screen {
                     }
                 }
                 //Move Missiles
-                ArrayList<Vector2> missilesToRemove = new ArrayList<Vector2>();
+                ArrayList<Vector2> missilesToRemove = new ArrayList<>();
                 for (int i = 0; i < missiles.size(); i++) {
                     //Move Missile
                     missiles.get(i).add(500 * dt, 0);
@@ -464,13 +466,13 @@ public class GameScreen implements Screen {
                 }
 
                 //Enemy Missiles
-                if (System.currentTimeMillis() > lastEnemyShootTime + 1500 && (int)timer >= 3 && enemies.size() > 0) {
+                if (System.currentTimeMillis() > lastEnemyShootTime + 1500 && (int)timer >= 3 && !enemies.isEmpty()) {
                     lastEnemyShootTime = System.currentTimeMillis();
                     int randomEnemyIndex = random.nextInt(enemies.size());
                     Vector2 newEnemyMissile = new Vector2(enemies.get(randomEnemyIndex).x - enemySprites.get(randomEnemyIndex).getWidth()/2, enemies.get(randomEnemyIndex).y);
                     enemyMissiles.add(newEnemyMissile);
                 }
-                ArrayList<Vector2> enemyMissilesToRemove = new ArrayList<Vector2>();
+                ArrayList<Vector2> enemyMissilesToRemove = new ArrayList<>();
                 for (Vector2 enemyMissile : enemyMissiles){
                     float speed = level == 1 ? 1500 : 1700;
                     enemyMissile.add(-speed*dt, 0);
@@ -527,7 +529,6 @@ public class GameScreen implements Screen {
                 //Poll for input
                 restartButton.update(checkTouch, touchX, touchY);
                 if (restartButton.isDown) {
-                    restartButton.isDown = true;
                     restartActive = true;
                 } else if (restartActive) {
                     newGame();

@@ -13,14 +13,16 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 public class MenuScreen implements Screen {
     MyGdxGame game;
     private SpriteBatch batch;
-    private Skin skin;
     private Stage stage;
     private boolean isActive;
-    Texture buttonStartTexture;
-    Texture buttonStartDownTexture;
-    Button startButton;
-    Texture buttonExitTexture;
-    Texture buttonExitDownTexture;
+
+    //Start Button
+    private Texture buttonStartTexture;
+    private Texture buttonStartDownTexture;
+    private Button startButton;
+
+    //Exit Button
+    private Texture buttonExitTexture;
     Button exitButton;
     public MenuScreen(MyGdxGame game){this.game = game;}
     public void create() {
@@ -50,7 +52,6 @@ public class MenuScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        Gdx.app.log("MenuScreen: ","menuScreen render");
         Gdx.gl.glClearColor(30/255f, 80/255f, 140/255f, 1); // Set the clear color (background color)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); // Clear the screen
 
