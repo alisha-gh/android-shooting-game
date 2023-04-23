@@ -38,6 +38,7 @@ public class GameScreen implements Screen {
     boolean restartActive;
 
     public static final float MOVEMENT_SPEED = 500.0f;
+    private Random random = new Random();
 
     //Game clock
     float dt;
@@ -60,18 +61,21 @@ public class GameScreen implements Screen {
     private ArrayList<Sprite> enemySprites = new ArrayList<>();
     private ArrayList<Vector2> enemies = new ArrayList<>();
     long lastEnemyCreatedTime = 0;
+    ArrayList<Vector2> enemiesToRemove = new ArrayList<>();
 
     //Player Missile
     private Texture missileTexture;
     private Sprite missileSprite;
     private Vector2 missilePosition;
     private ArrayList<Vector2> missiles = new ArrayList<>();
+    ArrayList<Vector2> missilesToRemove = new ArrayList<>();
 
     //Enemy Missile
     private Texture enemyMissileTexture;
     private Sprite enemyMissileSprite;
     private ArrayList<Vector2> enemyMissiles = new ArrayList<>();
     long lastEnemyShootTime = 0;
+    ArrayList<Vector2> enemyMissilesToRemove = new ArrayList<>();
 
     //Batch
     private  SpriteBatch spriteBatch;
@@ -280,7 +284,7 @@ public class GameScreen implements Screen {
             enemyMissileSprite.draw(spriteBatch);
         }
 
-        //Player and Enemy Collision
+        //Player Collision Animation
         if (isDestroying){
             playerDestroyingFrame += 10 * dt;
             if (playerDestroyingFrame >= playerDestroyingTextures.length){
@@ -322,6 +326,7 @@ public class GameScreen implements Screen {
         pauseButton.draw(uiBatch);
         musicButton.draw(uiBatch);
         uiBatch.end();
+
         //Complete
         if (gameState == GameState.COMPLETE || gameState == GameState.PAUSE) {
             uiBatch.begin();
@@ -378,153 +383,20 @@ public class GameScreen implements Screen {
             backgroundMusic.pause();
         }
 
-        //Update Game State based on input
         switch (gameState) {
             case PLAYING: {
                 timer += dt;
-
-                int moveX = 0;
-                int moveY = 0;
-                if (moveLeftButton.isDown) {
-                    moveX -= 1;
-                }
-                if (moveRightButton.isDown) {
-                    moveX += 1;
-                }
-                if (moveDownButton.isDown) {
-                    moveY -= 1;
-                }
-                if (moveUpButton.isDown) {
-                    moveY += 1;
-                }
-
-                //Shoot Button
-                if (attackButton.justPressed()) {
-                    attackButton.isDown = true;
-                    attackButton.isDownPrev = true;
-                    this.missiles.add(new Vector2(playerPosition.x + playerSprite.getWidth(), playerPosition.y));
-                    shootSound.play();
-                }
-
-                //Move Background
-                backgroundX -= 800 * dt;
-                //Reposition the background when it goes out of scope
-                if(backgroundX < -backgroundTexture.getWidth()){
-                    backgroundX += backgroundTexture.getWidth();
-                }
-
-                //Determine Character Movement Distance
-                playerVector.x = moveX * MOVEMENT_SPEED * dt;
-                playerVector.y = moveY * MOVEMENT_SPEED * dt;
-                //Check movement against grid
-                if (playerVector.len2() > 0) { //Don't do anything if we're not moving
-                    //Move player
-                    playerPosition.x += playerVector.x;
-                    playerPosition.y += playerVector.y;
-                    playerSprite.translate(playerVector.x, playerVector.y);
-                }
-
-                //Generate Enemies every second
-                Random random = new Random();
-                int randomNum = random.nextInt(200);
-                int randomY = random.nextInt((int)camera.viewportHeight-150);
-                int frequency = level == 1 ? 2000 : 800;
-                if (System.currentTimeMillis() > lastEnemyCreatedTime + frequency) {
-                    lastEnemyCreatedTime = System.currentTimeMillis();
-                    Vector2 newEnemy = new Vector2(camera.viewportWidth + randomNum, randomY);
-                    enemies.add(newEnemy);
-                    Sprite newEnemySprite = new Sprite(enemyMovingTextures[0]);
-                    newEnemySprite.setSize(320,320);
-                    newEnemySprite.setPosition(newEnemy.x, newEnemy.y);
-                    enemySprites.add(newEnemySprite);
-                }
-
-                //Move Enemies
-                ArrayList<Vector2> enemiesToRemove = new ArrayList<>();
-                for(int i = 0; i < enemies.size(); i++){
-                    float xPos = enemies.get(i).x;
-                    float speed = level == 1 ? 500 : 700;
-                    enemies.get(i).add(new Vector2(-speed*dt, 0));
-                    //Increase speed toward left screen
-                    if(xPos < camera.viewportWidth/2){
-                        enemies.get(i).add(new Vector2(-(speed+100)*dt, 0));
-                    }else{
-                        enemies.get(i).add(new Vector2(-speed*dt, 0));
-                    }
-                    if (enemies.get(i).x < -400) { //Remove the enemy when it's out of camera
-                        enemiesToRemove.add(enemies.get(i));
-                    }
-                }
-                //Move Missiles
-                ArrayList<Vector2> missilesToRemove = new ArrayList<>();
-                for (int i = 0; i < missiles.size(); i++) {
-                    //Move Missile
-                    missiles.get(i).add(500 * dt, 0);
-                    if (missiles.get(i).x > camera.viewportWidth + 200) { //Remove the missiles when it's out of camera
-                        missilesToRemove.add(missiles.get(i));
-                    }
-                }
-
-                //Enemy Missiles
-                if (System.currentTimeMillis() > lastEnemyShootTime + 1500 && (int)timer >= 3 && !enemies.isEmpty()) {
-                    lastEnemyShootTime = System.currentTimeMillis();
-                    int randomEnemyIndex = random.nextInt(enemies.size());
-                    Vector2 newEnemyMissile = new Vector2(enemies.get(randomEnemyIndex).x - enemySprites.get(randomEnemyIndex).getWidth()/2, enemies.get(randomEnemyIndex).y);
-                    enemyMissiles.add(newEnemyMissile);
-                }
-                ArrayList<Vector2> enemyMissilesToRemove = new ArrayList<>();
-                for (Vector2 enemyMissile : enemyMissiles){
-                    float speed = level == 1 ? 1500 : 1700;
-                    enemyMissile.add(-speed*dt, 0);
-                    if (enemyMissile.x > camera.viewportWidth - 200) { //Remove the missiles when it's out of camera
-                        enemyMissilesToRemove.add(enemyMissile);
-                    }
-                }
-
-                //Detect Player and Enemies Collisions
-                for(Vector2 enemy : enemies){
-                    if (enemy.dst(playerPosition) < 200){  //Collide
-                        enemiesToRemove.add(enemy);
-                        isDestroying = true;
-                        gameState = GameState.COMPLETE;
-                        collisionSound.play();
-                    }
-                }
-
-                //Detect Enemies and Missiles Collisions
-                for(Vector2 missile : missiles){
-                    for(Vector2 enemy : enemies){
-                        if (missile.dst(new Vector2(enemy.x + (320 / 2), enemy.y + (320 / 2))) < 200) {
-                            //200 is the enemy's size
-                            enemiesToRemove.add(enemy);
-                            missilesToRemove.add(missile);
-                            score += 1;
-                        }
-                    }
-                }
-
-                //Detect Player and enemy Missiles Collisions
-                for(Vector2 enemyMissile : enemyMissiles){
-                    if (enemyMissile.dst(playerPosition) < 200){  //Collide
-                        enemyMissilesToRemove.add(enemyMissile);
-                        isDestroying = true;
-                        gameState = GameState.COMPLETE;
-                        collisionSound.play();
-                    }
-                }
-
-                //Remove
-                for (Vector2 missile : missilesToRemove) {
-                    missiles.remove(missile);
-                }
-                for (Vector2 enemy : enemiesToRemove) {
-                    enemies.remove(enemy);
-                }
-                for (Vector2 enemyMissile : enemyMissilesToRemove) {
-                    enemyMissiles.remove(enemyMissile);
-                }
+                scrollBackground();
+                movePlayer();
+                playerShoot();
+                enemies();
+                enemyMissiles();
+                playerMissiles();
+                detectCollisions();
+                removeObjects();
             }
             break;
+
             case COMPLETE: {} case PAUSE: {
                 //Poll for input
                 restartButton.update(checkTouch, touchX, touchY);
@@ -550,6 +422,161 @@ public class GameScreen implements Screen {
             backgroundMusic.play();
         }
     }
+
+    private void scrollBackground(){
+        //Move Background
+        backgroundX -= 800 * dt;
+        //Reposition the background when it goes out of scope
+        if(backgroundX < -backgroundTexture.getWidth()){
+            backgroundX += backgroundTexture.getWidth();
+        }
+    }
+
+    private void movePlayer(){
+        //Movement Button
+        int moveX = 0;
+        int moveY = 0;
+        if (moveLeftButton.isDown) {
+            moveX -= 1;
+        }
+        if (moveRightButton.isDown) {
+            moveX += 1;
+        }
+        if (moveDownButton.isDown) {
+            moveY -= 1;
+        }
+        if (moveUpButton.isDown) {
+            moveY += 1;
+        }
+        //Determine Character Movement Distance
+        playerVector.x = moveX * MOVEMENT_SPEED * dt;
+        playerVector.y = moveY * MOVEMENT_SPEED * dt;
+        //Check movement against grid
+        if (playerVector.len2() > 0) { //Don't do anything if we're not moving
+            //Move player
+            playerPosition.x += playerVector.x;
+            playerPosition.y += playerVector.y;
+            playerSprite.translate(playerVector.x, playerVector.y);
+        }
+    }
+
+    private void playerShoot(){
+        //Shoot Button
+        if (attackButton.justPressed()) {
+            attackButton.isDown = true;
+            attackButton.isDownPrev = true;
+            this.missiles.add(new Vector2(playerPosition.x + playerSprite.getWidth(), playerPosition.y));
+            shootSound.play();
+        }
+    }
+
+    private void enemies(){
+        //Generate Enemies
+        int randomNum = random.nextInt(200);
+        int randomY = random.nextInt((int)camera.viewportHeight-150);
+        int frequency = level == 1 ? 2000 : 800;
+        if (System.currentTimeMillis() > lastEnemyCreatedTime + frequency) {
+            lastEnemyCreatedTime = System.currentTimeMillis();
+            Vector2 newEnemy = new Vector2(camera.viewportWidth + randomNum, randomY);
+            enemies.add(newEnemy);
+            Sprite newEnemySprite = new Sprite(enemyMovingTextures[0]);
+            newEnemySprite.setSize(320,320);
+            newEnemySprite.setPosition(newEnemy.x, newEnemy.y);
+            enemySprites.add(newEnemySprite);
+        }
+        //Move Enemies
+        for(int i = 0; i < enemies.size(); i++){
+            float xPos = enemies.get(i).x;
+            float speed = level == 1 ? 500 : 700;
+            enemies.get(i).add(new Vector2(-speed*dt, 0));
+            //Increase speed toward left screen
+            if(xPos < camera.viewportWidth/2){
+                enemies.get(i).add(new Vector2(-(speed+100)*dt, 0));
+            }else{
+                enemies.get(i).add(new Vector2(-speed*dt, 0));
+            }
+            if (enemies.get(i).x < -400) { //Remove the enemy when it's out of camera
+                enemiesToRemove.add(enemies.get(i));
+            }
+        }
+    }
+
+    private void enemyMissiles(){
+        //Generate Enemy Missiles
+        if (System.currentTimeMillis() > lastEnemyShootTime + 1500 && (int)timer >= 3 && !enemies.isEmpty()) {
+            lastEnemyShootTime = System.currentTimeMillis();
+            int randomEnemyIndex = random.nextInt(enemies.size());
+            Vector2 newEnemyMissile = new Vector2(enemies.get(randomEnemyIndex).x - enemySprites.get(randomEnemyIndex).getWidth()/2, enemies.get(randomEnemyIndex).y);
+            enemyMissiles.add(newEnemyMissile);
+        }
+        //Move Enemy Missiles
+        for (Vector2 enemyMissile : enemyMissiles){
+            float speed = level == 1 ? 1500 : 1700;
+            enemyMissile.add(-speed*dt, 0);
+            if (enemyMissile.x > camera.viewportWidth - 200) { //Remove the missiles when it's out of camera
+                enemyMissilesToRemove.add(enemyMissile);
+            }
+        }
+    }
+
+    private void playerMissiles(){
+        //Move Missiles
+        for (int i = 0; i < missiles.size(); i++) {
+            //Move Missile
+            missiles.get(i).add(500 * dt, 0);
+            if (missiles.get(i).x > camera.viewportWidth + 200) { //Remove the missiles when it's out of camera
+                missilesToRemove.add(missiles.get(i));
+            }
+        }
+    }
+
+    private void detectCollisions(){
+        //Detect Player and Enemies Collisions
+        for(Vector2 enemy : enemies){
+            if (enemy.dst(playerPosition) < 200){  //Collide
+                enemiesToRemove.add(enemy);
+                isDestroying = true;
+                gameState = GameState.COMPLETE;
+                collisionSound.play();
+            }
+        }
+
+        //Detect Enemies and Missiles Collisions
+        for(Vector2 missile : missiles){
+            for(Vector2 enemy : enemies){
+                if (missile.dst(new Vector2(enemy.x + (320 / 2), enemy.y + (320 / 2))) < 200) {
+                    //200 is the enemy's size
+                    enemiesToRemove.add(enemy);
+                    missilesToRemove.add(missile);
+                    score += 1;
+                }
+            }
+        }
+
+        //Detect Player and enemy Missiles Collisions
+        for(Vector2 enemyMissile : enemyMissiles){
+            if (enemyMissile.dst(playerPosition) < 200){  //Collide
+                enemyMissilesToRemove.add(enemyMissile);
+                isDestroying = true;
+                gameState = GameState.COMPLETE;
+                collisionSound.play();
+            }
+        }
+    }
+
+    private void removeObjects(){
+        //Remove
+        for (Vector2 missile : missilesToRemove) {
+            missiles.remove(missile);
+        }
+        for (Vector2 enemy : enemiesToRemove) {
+            enemies.remove(enemy);
+        }
+        for (Vector2 enemyMissile : enemyMissilesToRemove) {
+            enemyMissiles.remove(enemyMissile);
+        }
+    }
+
 
     @Override
     public void dispose() {
