@@ -124,6 +124,16 @@ public class GameScreen implements Screen {
     public GameScreen(MyGdxGame game) {
         this.game = game;
     }
+    /**
+     This class represents a Game Screen in a game.
+     It extends the Screen class provided by LibGDX and implements the show() method.
+     It initializes the SpriteBatches, the OrthographicCamera, the background textures, player textures, enemy textures, button textures, and sound effects used in the game.
+     It also creates instances of the Button class to control the player's movement and shooting, and to pause and mute the game. Additionally, it creates instances of the Sprite class for the player, missiles, and victory screen.
+     This class also plays background music and sound effects during the game, and displays the score and timer on the screen using BitmapFonts.
+     @author kuocy013
+     @version 1.0
+     @since 2023-04-23
+     */
     @Override
     public void show() {
         Gdx.app.log("GameScreen: ", "gameScreen create");
@@ -222,6 +232,10 @@ public class GameScreen implements Screen {
         newGame();
     }
 
+    /**
+    Overrides the render method of the parent class to render the game screen.
+    @param delta the time in seconds since the last render.
+    */
     @Override
     public void render(float delta) {
         dt = Gdx.graphics.getDeltaTime();
@@ -332,7 +346,9 @@ public class GameScreen implements Screen {
         }
     }
 
-    /**Method for all game logic. This method is called at the start of GameCore.render() below. */
+    /**
+    Method for all game logic. This method is called at the start of GameCore.render() below.
+    */
     private void update() {
         //Touch Input Info
         boolean checkTouch = Gdx.input.isTouched();
@@ -377,6 +393,13 @@ public class GameScreen implements Screen {
         }
     }
 
+     /**
+     Check the current level based on the player's score and timer.
+     If the player's score exceeds 50 or the timer exceeds 120 seconds, the game is won,
+     and the game state is set to complete.
+     If the timer reaches 20 seconds, the level is updated to level 2 and the background music is changed
+     to the level 2 music. The current background music is stopped before playing the new music.
+     */
     private void checkLevel() {
         if(score > 50 || timer > 120){
             win = true;
@@ -390,6 +413,9 @@ public class GameScreen implements Screen {
         }
     }
 
+    /**
+    Controls the music of the game including muting and unmuting.
+    */
     private void musicControl(){
         //Mute and Unmute Button
         if (musicButton.justPressed()) {
@@ -410,6 +436,12 @@ public class GameScreen implements Screen {
         }
     }
 
+     /**
+     Controls the pause and resume button.
+     If the pause button is pressed, the game is paused and the button texture is set to resume.
+     If the resume button is pressed, the game is resumed and the button texture is set to pause.
+     If the game is currently playing, the button texture is set to pause.
+     */
     private void pauseControl(){
         //Pause and Resume Button
         if (pauseButton.justPressed()) {
@@ -426,6 +458,11 @@ public class GameScreen implements Screen {
         }
     }
 
+     /**
+     Scrolls the game background to create a continuous scrolling effect.
+     Uses the time elapsed between frames to determine the distance to move the background.
+     If the background goes out of scope, it repositions it to create the scrolling effect.
+     */
     private void scrollBackground(){
         //Move Background
         backgroundX -= 800 * dt;
@@ -435,6 +472,11 @@ public class GameScreen implements Screen {
         }
     }
 
+     /**
+     Controls the player's movement based on the movement buttons being pressed.
+     Calculates the character movement distance based on the movement speed and delta time.
+     Checks player movement against the grid to ensure it stays within bounds.
+     */
     private void playerMovementControl(){
         //Movement Button
         int moveX = 0;
@@ -454,7 +496,6 @@ public class GameScreen implements Screen {
         //Determine Character Movement Distance
         playerVector.x = moveX * MOVEMENT_SPEED * dt;
         playerVector.y = moveY * MOVEMENT_SPEED * dt;
-        //Check movement against grid
         if (playerVector.len2() > 0) { //Don't do anything if we're not moving
             //Move player
             playerPosition.x += playerVector.x;
@@ -463,6 +504,9 @@ public class GameScreen implements Screen {
         }
     }
 
+     /**
+     Controls the shooting behavior of the player.
+     */
     private void playerShootControl(){
         //Shoot Button
         if (shootButton.justPressed()) {
@@ -473,6 +517,14 @@ public class GameScreen implements Screen {
         }
     }
 
+     /**
+     Manages the creation and movement of enemies.
+     Enemies are generated at a random Y position on the right of the screen
+     and move toward the left with a speed based on the current level.
+     The speed of the enemies is increased when they move toward the left half of the screen.
+     Enemies are removed when they go out of the camera.
+     @return void
+     */
     private void enemies(){
         //Generate Enemies
         int randomNum = random.nextInt(200);
@@ -504,6 +556,12 @@ public class GameScreen implements Screen {
         }
     }
 
+    /**
+    Manages the generation and movement of enemy missiles.
+    If the current time is greater than the last enemy missile shoot time plus a delay and the timer is greater than or equal to 3 and there are enemies present, a new enemy missile is generated at a random enemy position.
+    The enemy missiles move from right to left on the screen at a constant speed that depends on the current level.
+    If an enemy missile goes out of the left edge of the screen, it is added to a list of missiles to be removed from the game.
+    */
     private void enemyMissiles(){
         //Generate Enemy Missiles
         if (System.currentTimeMillis() > lastEnemyShootTime + 1500 && (int)timer >= 3 && !enemies.isEmpty()) {
@@ -522,6 +580,11 @@ public class GameScreen implements Screen {
         }
     }
 
+     /**
+     Manages the position of the player's missiles on the screen.
+     It moves each missile by a fixed distance per frame and checks if it has gone out of the screen.
+     If a missile is out of the screen, it adds it to a list of missiles to be removed.
+     */
     private void playerMissiles(){
         //Move Missiles
         for (Vector2 missile : missiles) {
@@ -533,6 +596,10 @@ public class GameScreen implements Screen {
         }
     }
 
+     /**
+     Detects collisions between the player, enemies, missiles, and enemy missiles.
+     Removes the collided entities and updates the game state and score.
+     */
     private void detectCollisions(){
         //Detect Player and Enemies Collisions
         for(Vector2 enemy : enemies){
@@ -567,6 +634,9 @@ public class GameScreen implements Screen {
         }
     }
 
+     /**
+     Removes the game objects that have been marked for removal from the game world.
+     */
     private void removeObjects(){
         //Remove
         for (Vector2 missile : missilesToRemove) {
