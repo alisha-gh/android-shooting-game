@@ -86,8 +86,8 @@ public class GameScreen implements Screen {
     private Texture buttonSquareDownTexture;
     private Texture buttonRestartTexture;
     private Texture buttonRestartDownTexture;
-    private Texture buttonAttackTexture;
-    private Texture buttonAttackDownTexture;
+    private Texture buttonShootTexture;
+    private Texture buttonShootDownTexture;
     private Texture buttonPauseTexture;
     private Texture buttonResumeTexture;
     private Texture buttonMuteTexture;
@@ -99,7 +99,7 @@ public class GameScreen implements Screen {
     private Button moveDownButton;
     private Button moveUpButton;
     private Button restartButton;
-    private  Button attackButton;
+    private  Button shootButton;
     private  Button pauseButton;
     private   Button musicButton;
 
@@ -161,8 +161,8 @@ public class GameScreen implements Screen {
         buttonRestartDownTexture = new Texture("Buttons/play_pressed_purple.png");
         missileTexture = new Texture("missile.png");
         enemyMissileTexture = new Texture("missile_enemy.png");
-        buttonAttackTexture = new Texture("Buttons/shoot_btn.png");
-        buttonAttackDownTexture = new Texture("Buttons/shoot_btn_pressed.png");
+        buttonShootTexture = new Texture("Buttons/shoot_btn.png");
+        buttonShootDownTexture = new Texture("Buttons/shoot_btn_pressed.png");
         buttonPauseTexture = new Texture("Buttons/pause_btn.png");
         buttonResumeTexture = new Texture("Buttons/resume_btn.png");
         buttonMuteTexture = new Texture("Buttons/mute_btn.png");
@@ -192,7 +192,7 @@ public class GameScreen implements Screen {
         moveRightButton = new Button(buttonSize*2+space, buttonSize+space, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
         moveDownButton = new Button(buttonSize+space, space, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
         moveUpButton = new Button(buttonSize+space, buttonSize*2+space, buttonSize, buttonSize, buttonSquareTexture, buttonSquareDownTexture);
-        attackButton = new Button(screenWidth - 500, 200, buttonSize*2, buttonSize*2, buttonAttackTexture, buttonAttackDownTexture);
+        shootButton = new Button(screenWidth - 500, 200, buttonSize*2, buttonSize*2, buttonShootTexture, buttonShootDownTexture);
         restartButton = new Button(screenWidth/2 - buttonSize*2, screenHeight/2 - buttonSize, buttonSize*4, buttonSize*2+50, buttonRestartTexture, buttonRestartDownTexture);
         pauseButton = new Button(screenWidth - buttonSize*2, topUIPaddingY, buttonSize, buttonSize, buttonPauseTexture, buttonPauseTexture);
         musicButton = new Button(screenWidth - buttonSize*4, topUIPaddingY, buttonSize, buttonSize, buttonUnmuteTexture, buttonMuteTexture);
@@ -297,7 +297,7 @@ public class GameScreen implements Screen {
             playerSprite.draw(spriteBatch);
         }
 
-        //Show score
+        //Show score and Timer
         scoreFont.draw(spriteBatch, "Score " + score, screenWidth*0.05f, topUIPaddingY+20.0f);
         int minutes = (int)timer / 60;
         int seconds = (int)timer % 60;
@@ -306,6 +306,7 @@ public class GameScreen implements Screen {
         layout.setText(timerFont, timeStr);
         float textWidth = layout.width;
         timerFont.draw(spriteBatch, timeStr, (screenWidth-textWidth)/2, topUIPaddingY+20.0f);
+
         //Show Victory
         if(win){
             victorySprite.setX((screenWidth-victorySprite.getWidth())/2);
@@ -322,7 +323,7 @@ public class GameScreen implements Screen {
         moveRightButton.draw(uiBatch);
         moveDownButton.draw(uiBatch);
         moveUpButton.draw(uiBatch);
-        attackButton.draw(uiBatch);
+        shootButton.draw(uiBatch);
         pauseButton.draw(uiBatch);
         musicButton.draw(uiBatch);
         uiBatch.end();
@@ -346,49 +347,19 @@ public class GameScreen implements Screen {
         moveRightButton.update(checkTouch, touchX, touchY);
         moveDownButton.update(checkTouch, touchX, touchY);
         moveUpButton.update(checkTouch, touchX, touchY);
-        attackButton.update(checkTouch, touchX, touchY);
+        shootButton.update(checkTouch, touchX, touchY);
         pauseButton.update(checkTouch, touchX, touchY);
         musicButton.update(checkTouch, touchX, touchY);
 
-        //Pause and Resume Button
-        if (pauseButton.justPressed()) {
-            if (gameState == GameState.PAUSE) { //Resume
-                gameState = GameState.PLAYING;
-                pauseButton.setTexture(buttonPauseTexture);
-            } else if (gameState == GameState.PLAYING){ //Pause
-                gameState = GameState.PAUSE;
-                pauseButton.setTexture(buttonResumeTexture);
-            }
-        }
-        if (gameState == GameState.PLAYING){
-            pauseButton.setTexture(buttonPauseTexture);
-        }
-
-        //Mute and Unmute Button
-        if (musicButton.justPressed()) {
-            if (isMuted) { //is not playing music, pressed to unmute
-                isMuted = false;
-                musicButton.setTexture(buttonUnmuteTexture);
-                backgroundMusic.play();
-            }
-            else { //is playing music, pressed to mute
-                isMuted = true;
-                musicButton.setTexture(buttonMuteTexture);
-                backgroundMusic.pause();
-            }
-        }
-
-        //Update mute
-        if(isMuted){
-            backgroundMusic.pause();
-        }
+        pauseControl();
+        musicControl();
 
         switch (gameState) {
             case PLAYING: {
                 timer += dt;
                 scrollBackground();
-                movePlayer();
-                playerShoot();
+                playerMovementControl();
+                playerShootControl();
                 enemies();
                 enemyMissiles();
                 playerMissiles();
@@ -423,6 +394,42 @@ public class GameScreen implements Screen {
         }
     }
 
+    private void musicControl(){
+        //Mute and Unmute Button
+        if (musicButton.justPressed()) {
+            if (isMuted) { //is not playing music, pressed to unmute
+                isMuted = false;
+                musicButton.setTexture(buttonUnmuteTexture);
+                backgroundMusic.play();
+            }
+            else { //is playing music, pressed to mute
+                isMuted = true;
+                musicButton.setTexture(buttonMuteTexture);
+                backgroundMusic.pause();
+            }
+        }
+        //Update mute
+        if(isMuted){
+            backgroundMusic.pause();
+        }
+    }
+
+    private void pauseControl(){
+        //Pause and Resume Button
+        if (pauseButton.justPressed()) {
+            if (gameState == GameState.PAUSE) { //Resume
+                gameState = GameState.PLAYING;
+                pauseButton.setTexture(buttonPauseTexture);
+            } else if (gameState == GameState.PLAYING){ //Pause
+                gameState = GameState.PAUSE;
+                pauseButton.setTexture(buttonResumeTexture);
+            }
+        }
+        if (gameState == GameState.PLAYING){
+            pauseButton.setTexture(buttonPauseTexture);
+        }
+    }
+
     private void scrollBackground(){
         //Move Background
         backgroundX -= 800 * dt;
@@ -432,7 +439,7 @@ public class GameScreen implements Screen {
         }
     }
 
-    private void movePlayer(){
+    private void playerMovementControl(){
         //Movement Button
         int moveX = 0;
         int moveY = 0;
@@ -460,11 +467,11 @@ public class GameScreen implements Screen {
         }
     }
 
-    private void playerShoot(){
+    private void playerShootControl(){
         //Shoot Button
-        if (attackButton.justPressed()) {
-            attackButton.isDown = true;
-            attackButton.isDownPrev = true;
+        if (shootButton.justPressed()) {
+            shootButton.isDown = true;
+            shootButton.isDownPrev = true;
             this.missiles.add(new Vector2(playerPosition.x + playerSprite.getWidth(), playerPosition.y));
             shootSound.play();
         }
@@ -485,18 +492,18 @@ public class GameScreen implements Screen {
             enemySprites.add(newEnemySprite);
         }
         //Move Enemies
-        for(int i = 0; i < enemies.size(); i++){
-            float xPos = enemies.get(i).x;
+        for(Vector2 enemy : enemies){
+            float xPos = enemy.x;
             float speed = level == 1 ? 500 : 700;
-            enemies.get(i).add(new Vector2(-speed*dt, 0));
+            enemy.add(new Vector2(-speed*dt, 0));
             //Increase speed toward left screen
             if(xPos < camera.viewportWidth/2){
-                enemies.get(i).add(new Vector2(-(speed+100)*dt, 0));
+                enemy.add(new Vector2(-(speed+100)*dt, 0));
             }else{
-                enemies.get(i).add(new Vector2(-speed*dt, 0));
+                enemy.add(new Vector2(-speed*dt, 0));
             }
-            if (enemies.get(i).x < -400) { //Remove the enemy when it's out of camera
-                enemiesToRemove.add(enemies.get(i));
+            if (enemy.x < -400) { //Remove the enemy when it's out of camera
+                enemiesToRemove.add(enemy);
             }
         }
     }
@@ -521,11 +528,11 @@ public class GameScreen implements Screen {
 
     private void playerMissiles(){
         //Move Missiles
-        for (int i = 0; i < missiles.size(); i++) {
+        for (Vector2 missile : missiles) {
             //Move Missile
-            missiles.get(i).add(500 * dt, 0);
-            if (missiles.get(i).x > camera.viewportWidth + 200) { //Remove the missiles when it's out of camera
-                missilesToRemove.add(missiles.get(i));
+            missile.add(500 * dt, 0);
+            if (missile.x > camera.viewportWidth + 200) { //Remove the missiles when it's out of camera
+                missilesToRemove.add(missile);
             }
         }
     }
@@ -577,7 +584,6 @@ public class GameScreen implements Screen {
         }
     }
 
-
     @Override
     public void dispose() {
         spriteBatch.dispose();
@@ -600,8 +606,8 @@ public class GameScreen implements Screen {
         buttonSquareDownTexture.dispose();
         buttonRestartTexture.dispose();
         buttonRestartDownTexture.dispose();
-        buttonAttackTexture.dispose();
-        buttonAttackDownTexture.dispose();
+        buttonShootTexture.dispose();
+        buttonShootDownTexture.dispose();
         missileTexture.dispose();
         buttonPauseTexture.dispose();
         buttonResumeTexture.dispose();
