@@ -126,10 +126,6 @@ public class GameScreen implements Screen {
     }
     @Override
     public void show() {
-        create();
-    }
-
-    private void create() {
         Gdx.app.log("GameScreen: ", "gameScreen create");
         spriteBatch = new SpriteBatch();
         uiBatch = new SpriteBatch();
